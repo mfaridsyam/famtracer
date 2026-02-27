@@ -67,6 +67,7 @@ function clearProfile() {
   localStorage.removeItem(LS_KEY);
 }
 
+// Reverse geocoding using Nominatim
 async function reverseGeocode(lat, lng) {
   try {
     const res = await fetch(
@@ -77,6 +78,7 @@ async function reverseGeocode(lat, lng) {
     const data = await res.json();
     if (!data || !data.address) return null;
     const a = data.address;
+    // Priority: village/suburb > quarter > neighbourhood > road > county
     const name =
       a.village || a.suburb || a.quarter || a.neighbourhood ||
       a.hamlet || a.residential || a.road ||
@@ -312,11 +314,13 @@ function initFirebaseSync() {
       if (id === state.myId) return;
       state.members[id] = m;
       placeMemberMarker(id, m);
+      // Fetch location name for member if not cached or coords changed
       const cached = state.memberLocationNames[id];
       if (!cached || cached.lat !== m.lat || cached.lng !== m.lng) {
         if (m.lat && m.lng) {
           reverseGeocode(m.lat, m.lng).then(locName => {
             state.memberLocationNames[id] = { lat: m.lat, lng: m.lng, name: locName };
+            // Update marker popup
             if (state.memberMarkers[id]) {
               const mem = state.members[id];
               const online = isOnline(mem.ts);
@@ -352,15 +356,51 @@ function pushMyLocation() {
 function initMap() {
   state.map = L.map('map', { zoomControl: false, attributionControl: true });
 
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap', maxZoom: 19
-  }).addTo(state.map);
+  state.layers = {
+    street: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap', maxZoom: 19
+    }),
+    satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      attribution: '© Esri', maxZoom: 19
+    })
+  };
+
+  state.activeLayer = 'street';
+  state.layers.street.addTo(state.map);
 
   if (state.myLat && state.myLng) {
     state.map.setView([state.myLat, state.myLng], 16);
     placeMyMarker(state.myLat, state.myLng);
   }
 }
+
+function openLayerPanel() {
+  const panel = document.getElementById('layerPanel');
+  panel.classList.toggle('show');
+}
+
+function setLayer(type) {
+  if (state.activeLayer === type) {
+    document.getElementById('layerPanel').classList.remove('show');
+    return;
+  }
+  state.map.removeLayer(state.layers[state.activeLayer]);
+  state.layers[type].addTo(state.map);
+  state.activeLayer = type;
+
+  document.querySelectorAll('.layer-option').forEach(el => el.classList.remove('active'));
+  document.getElementById(type === 'street' ? 'layerStreet' : 'layerSatellite').classList.add('active');
+  document.getElementById('layerPanel').classList.remove('show');
+}
+
+// Close layer panel on map click
+document.addEventListener('click', e => {
+  const panel = document.getElementById('layerPanel');
+  const btn   = document.getElementById('layerToggleBtn');
+  if (panel && !panel.contains(e.target) && btn && !btn.contains(e.target)) {
+    panel.classList.remove('show');
+  }
+});
 
 function createMarkerIcon(initial, color, offline) {
   const opacity = offline ? '0.45' : '1';
@@ -464,6 +504,7 @@ function startTracking() {
       state.myLng      = newLng;
       state.myAccuracy = Math.round(pos.coords.accuracy);
 
+      // Re-geocode if moved significantly or no name yet
       const moved = !prevLat || Math.abs(newLat - prevLat) > 0.0005 || Math.abs(newLng - prevLng) > 0.0005;
       if (moved || !state.myLocationName) {
         reverseGeocode(newLat, newLng).then(locName => {
@@ -550,6 +591,7 @@ function updateMyCard() {
       `<i class="fas fa-location-dot"></i> ${state.myLat.toFixed(5)}, ${state.myLng.toFixed(5)}`;
   }
 
+  // Location name
   const locEl = document.getElementById('myLocationName');
   if (locEl) {
     if (state.myLocationName) {
@@ -560,6 +602,7 @@ function updateMyCard() {
     }
   }
 
+  // Stats: removed battery, keep accuracy and update time
   if (state.myAccuracy !== null)
     document.getElementById('myAccuracy').textContent = state.myAccuracy + 'm';
 
