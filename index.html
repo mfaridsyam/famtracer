@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <meta name="theme-color" content="#0F3775"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="FamilyTrace"/>
+  <title>FamilyTrace — Lokasi Keluarga Real-time</title>
+  <link rel="manifest" href="manifest.json"/>
+  <link rel="apple-touch-icon" href="icon-192.png"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<div id="splash">
+  <div class="splash-logo"><i class="fas fa-map-pin"></i></div>
+  <div class="splash-title">Family<span>Trace</span></div>
+  <div class="splash-sub">Berbagi lokasi bersama keluarga</div>
+  <div class="splash-dots">
+    <div class="splash-dot"></div>
+    <div class="splash-dot"></div>
+    <div class="splash-dot"></div>
+  </div>
+</div>
+
+<div id="permission-screen">
+  <div class="permission-card">
+    <div class="perm-icon"><i class="fas fa-location-crosshairs"></i></div>
+    <h2 class="perm-title">Izinkan Akses Lokasi</h2>
+    <p class="perm-desc">FamilyTrace perlu mengakses lokasi perangkat kamu agar anggota keluarga bisa melihat posisimu secara real-time.</p>
+    <div class="perm-notice">
+      <div class="perm-notice-header">
+        <i class="fas fa-shield-halved"></i>
+        <span class="perm-notice-label">Keamanan &amp; Privasi</span>
+      </div>
+      <p class="perm-notice-body">Lokasi hanya dibagikan kepada anggota keluarga yang bergabung di room yang sama. Kamu dapat berhenti berbagi kapan saja.</p>
+    </div>
+    <button class="btn-allow" onclick="requestLocation()">
+      <i class="fas fa-location-dot"></i> Izinkan Lokasi
+    </button>
+    <button class="btn-deny" onclick="showDenied()">Tidak Sekarang</button>
+  </div>
+</div>
+
+<div id="denied-screen">
+  <div class="denied-card">
+    <div class="denied-icon"><i class="fas fa-circle-exclamation"></i></div>
+    <h2 class="denied-title">Lokasi Diperlukan</h2>
+    <p class="denied-desc">Tanpa izin lokasi, FamilyTrace tidak dapat bekerja. Izin lokasi dibutuhkan agar keluargamu bisa melihat posisimu secara real-time.</p>
+    <button class="btn-retry" onclick="retryPermission()">
+      <i class="fas fa-rotate-right"></i> Coba Lagi
+    </button>
+  </div>
+</div>
+
+<div id="setup-screen">
+  <div class="setup-card">
+    <div class="setup-header">
+      <div class="step-badge">LANGKAH TERAKHIR</div>
+      <h2 class="setup-title">Siapkan Profilmu</h2>
+      <p class="setup-desc">Isi informasi di bawah, lalu bergabung atau buat room keluarga baru.</p>
+    </div>
+    <div class="form-group">
+      <label>Nama Kamu</label>
+      <input type="text" id="inputName" placeholder="contoh: Ayah, Budi, Mama..." maxlength="20" autocomplete="off"/>
+    </div>
+    <div class="form-group">
+      <label>Peranmu dalam Keluarga</label>
+      <select id="inputRole">
+        <option value="Ayah">👨 Ayah</option>
+        <option value="Ibu">👩 Ibu</option>
+        <option value="Anak Laki-laki">👦 Anak Laki-laki</option>
+        <option value="Anak Perempuan">👧 Anak Perempuan</option>
+        <option value="Anggota Keluarga">👤 Anggota Keluarga</option>
+        <option value="Teman">🤝 Teman</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Kode Room Keluarga</label>
+      <div class="room-row">
+        <input type="text" id="inputRoom" placeholder="Masukkan atau buat kode..."
+               maxlength="8" autocomplete="off" style="text-transform:uppercase;font-family:'DM Mono',monospace;letter-spacing:3px;"/>
+        <button class="btn-generate" onclick="generateRoom()">
+          <i class="fas fa-dice"></i> Acak
+        </button>
+      </div>
+      <small class="input-hint">Bagikan kode ini ke anggota keluarga lain agar bisa bergabung.</small>
+    </div>
+    <button class="btn-start" onclick="startApp()">
+      <i class="fas fa-rocket"></i> Mulai Berbagi Lokasi
+    </button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="confirmLeaveModal">
+  <div class="modal-box confirm-modal-box">
+    <div class="confirm-icon-wrap">
+      <i class="fas fa-right-from-bracket"></i>
+    </div>
+    <h3 class="confirm-title">Keluar dari Room?</h3>
+    <p class="confirm-desc">Data lokasimu akan <strong>dihapus</strong> dari room ini dan anggota keluarga tidak akan bisa melihat posisimu lagi.</p>
+    <div class="confirm-actions">
+      <button class="confirm-btn-cancel" onclick="closeConfirmLeave()">Batal</button>
+      <button class="confirm-btn-danger" onclick="doLeaveRoom()">Ya, Keluar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="shareModal">
+  <div class="modal-box">
+    <h3 class="modal-title">Undang Keluarga</h3>
+    <p class="modal-desc">Bagikan kode room ini ke anggota keluarga agar mereka bisa bergabung dan saling melihat lokasi.</p>
+    <div class="code-box">
+      <span class="code-val" id="modalRoomCode">——</span>
+      <button class="copy-btn" onclick="copyCode()"><i class="fas fa-copy"></i> Salin</button>
+    </div>
+    <div class="share-options">
+      <button class="share-opt wa" onclick="shareWA()">
+        <i class="fab fa-whatsapp"></i> WhatsApp
+      </button>
+      <button class="share-opt tele" onclick="shareTelegram()">
+        <i class="fab fa-telegram"></i> Telegram
+      </button>
+      <button class="share-opt copy" onclick="copyLink()">
+        <i class="fas fa-link"></i> Salin Link
+      </button>
+    </div>
+    <button class="modal-close-btn" onclick="closeModal()">Tutup</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="installModal">
+  <div class="modal-box">
+    <h3 class="modal-title"><i class="fas fa-download" style="color:var(--sky);margin-right:.5rem"></i>Install Aplikasi</h3>
+    <p class="modal-desc">Install FamilyTrace ke layar utama HP kamu agar bisa dibuka seperti aplikasi biasa.</p>
+
+    <div class="install-section" id="installAndroid">
+      <div class="install-platform">
+        <div class="install-platform-header">
+          <div class="install-platform-icon android"><i class="fab fa-android"></i></div>
+          <div class="install-platform-name">Android (Chrome)</div>
+        </div>
+        <div class="install-platform-body">
+          <ol class="install-steps">
+            <li>Buka website ini di <strong>Chrome</strong></li>
+            <li>Tap menu <strong>⋮</strong> (titik tiga) di kanan atas</li>
+            <li>Pilih <strong>"Tambahkan ke layar utama"</strong></li>
+            <li>Tap <strong>"Tambahkan"</strong> untuk konfirmasi</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+    <div class="install-divider"></div>
+
+    <div class="install-section" id="installIOS">
+      <div class="install-platform">
+        <div class="install-platform-header">
+          <div class="install-platform-icon ios"><i class="fab fa-apple"></i></div>
+          <div class="install-platform-name">iPhone / iPad (Safari)</div>
+        </div>
+        <div class="install-platform-body">
+          <ol class="install-steps">
+            <li>Buka website ini di <strong>Safari</strong></li>
+            <li>Tap tombol <strong>Share</strong> <i class="fas fa-arrow-up-from-bracket" style="font-size:.75rem"></i> di bawah layar</li>
+            <li>Scroll ke bawah, pilih <strong>"Add to Home Screen"</strong></li>
+            <li>Tap <strong>"Add"</strong> di pojok kanan atas</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+    <button class="modal-close-btn" onclick="closeInstallModal()" style="margin-top:.5rem">Tutup</button>
+  </div>
+</div>
+
+<div id="app">
+
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-logo"><i class="fas fa-map-pin"></i></div>
+      <div class="topbar-name">Family<span>Trace</span></div>
+    </div>
+    <div class="topbar-right">
+      <div class="room-badge" onclick="openModal()" title="Klik untuk undang keluarga">
+        <i class="fas fa-users"></i>
+        <span id="topbarRoomCode">——</span>
+      </div>
+      <button class="topbar-btn" id="installBtn" onclick="openInstallModal()" title="Install Aplikasi">
+        <i class="fas fa-download"></i>
+      </button>
+      <button class="topbar-btn topbar-btn-exit" onclick="changeProfile()" title="Keluar / Ganti profil">
+        <i class="fas fa-right-from-bracket"></i>
+      </button>
+    </div>
+  </div>
+
+  <div class="main-layout">
+
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <span class="sidebar-title">Anggota</span>
+        <div class="sidebar-header-right">
+          <div class="online-count">
+            <div class="online-dot"></div>
+            <span id="onlineCount">1</span> online
+          </div>
+          <button class="sidebar-close-btn" id="sidebarCloseBtn" onclick="closeSidebar()">
+            <i class="fas fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="my-card">
+        <div class="my-card-top">
+          <div class="my-avatar" id="myAvatar">—</div>
+          <div class="my-info">
+            <div class="my-name" id="myCardName">—</div>
+            <div class="my-role" id="myCardRole">—</div>
+          </div>
+          <div class="my-badge">Saya</div>
+        </div>
+        <div class="my-coords" id="myCoords">
+          <i class="fas fa-location-dot"></i>
+          <span>Mendapatkan lokasi...</span>
+        </div>
+        <div class="my-location-name" id="myLocationName" style="display:none;">
+          <i class="fas fa-map-marker-alt"></i>
+          <span>—</span>
+        </div>
+        <div class="my-stats">
+          <div class="my-stat">
+            <div class="my-stat-val" id="myAccuracy">—</div>
+            <div class="my-stat-label">📡 Akurasi</div>
+          </div>
+          <div class="my-stat">
+            <div class="my-stat-val" id="myUpdate">—</div>
+            <div class="my-stat-label">🕐 Update</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="members-list" id="membersList">
+        <div class="no-members" id="noMembers">
+          <i class="fas fa-users"></i>
+          <p>Belum ada anggota lain.<br>Undang keluargamu dengan kode room!</p>
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        <button class="share-btn" onclick="openModal()">
+          <i class="fas fa-share-nodes"></i> Undang Anggota Keluarga
+        </button>
+        <button class="stop-btn" id="stopBtn" onclick="stopSharing()">
+          <i class="fas fa-location-slash"></i> Stop Berbagi Lokasi
+        </button>
+      </div>
+    </div>
+
+    <div class="map-wrapper">
+      <button class="mob-toggle" id="mobToggle" onclick="toggleSidebar()">
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="map-status">
+        <i class="fas fa-circle"></i>
+        Lokasi diperbarui otomatis &nbsp;·&nbsp;
+        <span class="update-time" id="lastUpdate">—</span>
+      </div>
+      <div id="map"></div>
+      <div class="map-controls">
+        <button class="map-ctrl-btn" onclick="centerMyLocation()" title="Lokasiku">
+          <i class="fas fa-crosshairs"></i>
+        </button>
+        <button class="map-ctrl-btn" onclick="fitAll()" title="Lihat semua">
+          <i class="fas fa-expand"></i>
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+
+<script type="module">
+  import { initializeApp }   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, set, onValue, remove, onDisconnect, update }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey:            "AIzaSyAVIFJIGFDv6EgHhac9aUF_g9ApehmDALQ",
+    authDomain:        "famtracer-d7725.firebaseapp.com",
+    databaseURL:       "https://famtracer-d7725-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId:         "famtracer-d7725",
+    storageBucket:     "famtracer-d7725.firebasestorage.app",
+    messagingSenderId: "586025840029",
+    appId:             "1:586025840029:web:e4e8af82cd563203171374"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db  = getDatabase(app);
+
+  window._FB = { db, ref, set, onValue, remove, onDisconnect, update };
+  window.dispatchEvent(new Event('firebaseReady'));
+</script>
+
+<script src="app.js"></script>
+
+</body>
+</html>

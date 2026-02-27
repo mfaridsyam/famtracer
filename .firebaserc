@@ -1,0 +1,14 @@
+{
+  "projects": {
+    "default": "famtracer-d7725"
+  },
+  "targets": {
+    "famtracer-d7725": {
+      "hosting": {
+        "famtracer": [
+          "famtracer"
+        ]
+      }
+    }
+  }
+}
