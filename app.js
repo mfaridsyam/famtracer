@@ -1,6 +1,3 @@
-// ============================================================
-// TRANSLATIONS
-// ============================================================
 const TRANSLATIONS = {
   id: {
     splashSub: 'Berbagi lokasi bersama siapa saja',
@@ -79,8 +76,8 @@ const TRANSLATIONS = {
     stopDone: 'Berbagi Dihentikan',
     toastWelcome: (name) => `Selamat datang, ${name}!`,
     toastInstalling: 'Menginstall TraceLink...',
-    toastInstalled: 'TraceLink berhasil diinstall! 🎉',
-    toastCopied: 'Link disalin! 🔗',
+    toastInstalled: 'TraceLink berhasil diinstall!',
+    toastCopied: 'Link disalin!',
     toastStopped: 'Kamu berhenti berbagi lokasi',
     errName: 'Masukkan nama kamu dulu!',
     errNameChar: 'Nama hanya boleh menggunakan huruf!',
@@ -179,8 +176,8 @@ const TRANSLATIONS = {
     stopDone: 'Sharing Stopped',
     toastWelcome: (name) => `Welcome, ${name}!`,
     toastInstalling: 'Installing TraceLink...',
-    toastInstalled: 'TraceLink installed! 🎉',
-    toastCopied: 'Link copied! 🔗',
+    toastInstalled: 'TraceLink installed!',
+    toastCopied: 'Link copied!',
     toastStopped: 'You stopped sharing location',
     errName: 'Please enter your name!',
     errNameChar: 'Name can only contain letters!',
@@ -204,9 +201,6 @@ const TRANSLATIONS = {
   }
 };
 
-// ============================================================
-// STATE
-// ============================================================
 const LS_KEY       = 'tracelink_profile';
 const LS_LANG      = 'tracelink_lang';
 const LS_THEME     = 'tracelink_theme';
@@ -243,34 +237,27 @@ const state = {
   theme: localStorage.getItem(LS_THEME) || 'light'
 };
 
-// ============================================================
-// I18N
-// ============================================================
 function t(key, ...args) {
   const val = TRANSLATIONS[state.lang][key];
   if (typeof val === 'function') return val(...args);
   return val ?? key;
 }
 
-// Elements whose content is managed by live data — never override them with i18n
 const LIVE_DATA_IDS = new Set(['myCoordsVal', 'myLocationName', 'myAccuracy', 'myUpdate', 'lastUpdate', 'onlineCount', 'topbarRoomCode', 'modalRoomCode']);
 
 function applyTranslations() {
   document.querySelectorAll('[data-i18n]').forEach(el => {
-    // Skip elements that display live GPS/location data
     if (el.id && LIVE_DATA_IDS.has(el.id)) return;
     const key = el.getAttribute('data-i18n');
     const val = TRANSLATIONS[state.lang][key];
     if (val !== undefined) el.innerHTML = val;
   });
 
-  // Placeholders
   const inputName = document.getElementById('inputName');
   if (inputName) inputName.placeholder = t('placeholderName');
   const inputRoom = document.getElementById('inputRoom');
   if (inputRoom) inputRoom.placeholder = t('placeholderRoom');
 
-  // Role select
   const sel = document.getElementById('inputRole');
   if (sel) {
     const curVal = sel.value;
@@ -284,7 +271,6 @@ function applyTranslations() {
     sel.value = curVal;
   }
 
-  // Install steps
   const androidEl = document.getElementById('androidSteps');
   if (androidEl) {
     androidEl.innerHTML = t('androidSteps').map(s => `<li>${s}</li>`).join('');
@@ -294,7 +280,6 @@ function applyTranslations() {
     iosEl.innerHTML = t('iosSteps').map(s => `<li>${s}</li>`).join('');
   }
 
-  // Lang labels
   const label = state.lang === 'id' ? 'ID' : 'EN';
   ['langLabelPerm','langLabelApp','langLabelMob'].forEach(id => {
     const el = document.getElementById(id);
@@ -306,19 +291,14 @@ function toggleLang() {
   state.lang = state.lang === 'id' ? 'en' : 'id';
   localStorage.setItem(LS_LANG, state.lang);
   applyTranslations();
-  // Re-render dynamic content that uses translated strings
   if (state.myLat) updateMyCard();
   renderMembers();
-  // Update stop button if already in stopped state
   const stopBtn = document.getElementById('stopBtn');
   if (stopBtn && stopBtn.disabled) {
     stopBtn.innerHTML = '<i class="fas fa-check"></i> ' + t('stopDone');
   }
 }
 
-// ============================================================
-// THEME
-// ============================================================
 function applyTheme() {
   document.body.setAttribute('data-theme', state.theme);
   const isDark = state.theme === 'dark';
@@ -335,9 +315,6 @@ function toggleTheme() {
   applyTheme();
 }
 
-// ============================================================
-// HELPERS
-// ============================================================
 function timeAgo(ts) {
   if (!ts) return t('timeUnknown');
   const diff = Date.now() - ts;
@@ -417,11 +394,7 @@ window.addEventListener('appinstalled', () => {
 
 window.addEventListener('firebaseReady', () => { state.fbReady = true; });
 
-// ============================================================
-// INIT
-// ============================================================
 window.addEventListener('load', () => {
-  // Apply theme + lang immediately
   applyTheme();
   applyTranslations();
 
@@ -621,9 +594,6 @@ function doLeaveRoom() {
   window.location.href = window.location.origin + window.location.pathname;
 }
 
-// ============================================================
-// FIREBASE
-// ============================================================
 function initFirebaseSync() {
   const { db, ref, onValue } = window._FB;
   pushMyLocation();
@@ -677,9 +647,6 @@ function pushMyLocation() {
   });
 }
 
-// ============================================================
-// MAP
-// ============================================================
 function initMap() {
   state.map = L.map('map', { zoomControl: false, attributionControl: true });
   state.layers = {
@@ -832,9 +799,6 @@ function fitAll() {
     state.map.flyToBounds(L.latLngBounds(pts).pad(0.2), { duration: 1 });
 }
 
-// ============================================================
-// TRACKING
-// ============================================================
 function startTracking() {
   state.watchId = navigator.geolocation.watchPosition(
     pos => {
@@ -891,9 +855,6 @@ function stopSharing() {
   btn.disabled = true;
 }
 
-// ============================================================
-// MY CARD
-// ============================================================
 function initMyCard() {
   document.getElementById('myCardName').textContent = state.name;
   document.getElementById('myCardRole').textContent = state.role;
@@ -930,9 +891,6 @@ function updateLastUpdate() {
     new Date().toLocaleTimeString(state.lang === 'id' ? 'id-ID' : 'en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 }
 
-// ============================================================
-// RENDER MEMBERS
-// ============================================================
 function renderMembers() {
   const list    = document.getElementById('membersList');
   const noMem   = document.getElementById('noMembers');
@@ -1017,9 +975,6 @@ function locateMember(id) {
   }
 }
 
-// ============================================================
-// MODALS
-// ============================================================
 function openModal()  { document.getElementById('shareModal').classList.add('show'); }
 function closeModal() { document.getElementById('shareModal').classList.remove('show'); }
 
@@ -1058,9 +1013,6 @@ function shareTelegram() {
   window.open(`https://t.me/share/url?url=${url}&text=${msg}`, '_blank');
 }
 
-// ============================================================
-// TOAST
-// ============================================================
 function toast(msg, type = '') {
   const c  = document.getElementById('toastContainer');
   const el = document.createElement('div');
@@ -1074,9 +1026,6 @@ function toast(msg, type = '') {
   }, 3200);
 }
 
-// ============================================================
-// SIDEBAR
-// ============================================================
 function toggleSidebar() {
   document.getElementById('sidebar').classList.toggle('mob-open');
 }

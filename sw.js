@@ -1,4 +1,4 @@
-const CACHE_NAME = 'familytrace-v2';
+const CACHE_NAME = 'tracelink-v1';
 const ASSETS = ['/', '/index.html', '/app.js', '/style.css', '/manifest.json'];
 
 self.addEventListener('install', e => {

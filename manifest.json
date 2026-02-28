@@ -1,7 +1,7 @@
 {
-  "name": "FamilyTrace",
-  "short_name": "FamilyTrace",
-  "description": "Berbagi lokasi bersama keluarga secara real-time",
+  "name": "TraceLink",
+  "short_name": "TraceLink",
+  "description": "Berbagi lokasi secara real-time",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0F3775",
@@ -9,13 +9,13 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "icon-192.png",
+      "src": "https://res.cloudinary.com/dnacoymkh/image/upload/v1772290923/icon.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "icon-512.png",
+      "src": "https://res.cloudinary.com/dnacoymkh/image/upload/v1772290923/icon.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
