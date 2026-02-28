@@ -1,10 +1,221 @@
-const LS_KEY = 'familytrace_profile';
+// ============================================================
+// TRANSLATIONS
+// ============================================================
+const TRANSLATIONS = {
+  id: {
+    splashSub: 'Berbagi lokasi bersama siapa saja',
+    permTitle: 'Izinkan Akses Lokasi',
+    permDesc: 'TraceLink perlu mengakses lokasi perangkat kamu agar anggota grup bisa melihat posisimu secara real-time.',
+    permNoticeLabel: 'Keamanan & Privasi',
+    permNoticeBody: 'Lokasi hanya dibagikan kepada anggota yang bergabung di room yang sama. Kamu dapat berhenti berbagi kapan saja.',
+    btnAllow: 'Izinkan Lokasi',
+    btnDeny: 'Tidak Sekarang',
+    deniedTitle: 'Lokasi Diperlukan',
+    deniedDesc: 'Tanpa izin lokasi, TraceLink tidak dapat bekerja. Izin lokasi dibutuhkan agar anggota grupmu bisa melihat posisimu secara real-time.',
+    btnRetry: 'Coba Lagi',
+    stepBadge: 'LANGKAH TERAKHIR',
+    setupTitle: 'Siapkan Profilmu',
+    setupDesc: 'Isi informasi di bawah, lalu bergabung atau buat room baru.',
+    labelName: 'Nama Kamu',
+    placeholderName: 'contoh: Budi, Andi, Sarah...',
+    labelRole: 'Peranmu dalam Grup',
+    labelRoom: 'Kode Room',
+    placeholderRoom: 'Ketik atau klik Acak...',
+    roomHint: 'Bagikan kode ini ke anggota lain agar bisa bergabung.',
+    btnRandom: 'Acak',
+    btnStart: 'Mulai Berbagi Lokasi',
+    confirmLeaveTitle: 'Keluar dari Room?',
+    confirmLeaveDesc: 'Data lokasimu akan <strong>dihapus</strong> dari room ini dan anggota lain tidak akan bisa melihat posisimu lagi.',
+    btnCancel: 'Batal',
+    btnLeave: 'Ya, Keluar',
+    shareTitle: 'Undang Anggota',
+    shareDesc: 'Bagikan kode room ini agar orang lain bisa bergabung dan saling melihat lokasi.',
+    btnCopyLink: 'Salin Link',
+    btnClose: 'Tutup',
+    installTitle: 'Install Aplikasi',
+    installDesc: 'Install TraceLink ke layar utama HP kamu agar bisa dibuka seperti aplikasi biasa.',
+    androidSteps: [
+      'Buka website ini di <strong>Chrome</strong>',
+      'Tap menu <strong>⋮</strong> (titik tiga) di kanan atas',
+      'Pilih <strong>"Tambahkan ke layar utama"</strong>',
+      'Tap <strong>"Tambahkan"</strong> untuk konfirmasi'
+    ],
+    iosSteps: [
+      'Buka website ini di <strong>Safari</strong>',
+      'Tap tombol <strong>Share</strong> ↑ di bawah layar',
+      'Pilih <strong>"Add to Home Screen"</strong>',
+      'Tap <strong>"Add"</strong> di pojok kanan atas'
+    ],
+    sidebarTitle: 'Anggota',
+    onlineLabel: 'online',
+    badgeMe: 'Saya',
+    labelCoords: 'Koordinat',
+    labelLocation: 'Lokasi',
+    labelAccuracy: 'Akurasi',
+    labelUpdate: 'Update',
+    loading: 'Memuat...',
+    otherMembers: 'ANGGOTA LAIN',
+    noMembersText: 'Belum ada anggota lain.\nUndang orang dengan kode room!',
+    btnInvite: 'Undang Anggota',
+    btnStop: 'Stop Berbagi Lokasi',
+    mapStatus: 'Lokasi diperbarui otomatis',
+    layerTitle: 'Tampilan Peta',
+    layerStreet: 'Street',
+    layerSatellite: 'Satelit',
+    ppOnline: 'Online',
+    ppMe: 'Saya',
+    ppCoords: 'Koordinat',
+    ppLocation: 'Lokasi',
+    ppAccuracy: 'Akurasi',
+    ppAccGood: 'Sangat Baik',
+    ppAccMid: 'Baik',
+    ppAccLow: 'Rendah',
+    mcOnline: 'Online',
+    mcOffline: 'Offline',
+    mcCoords: 'Koordinat',
+    mcLocation: 'Lokasi',
+    mcAccuracy: 'Akurasi',
+    mcLast: 'Terakhir',
+    stopDone: 'Berbagi Dihentikan',
+    toastWelcome: (name) => `Selamat datang, ${name}!`,
+    toastInstalling: 'Menginstall TraceLink...',
+    toastInstalled: 'TraceLink berhasil diinstall! 🎉',
+    toastCopied: 'Link disalin! 🔗',
+    toastStopped: 'Kamu berhenti berbagi lokasi',
+    errName: 'Masukkan nama kamu dulu!',
+    errNameChar: 'Nama hanya boleh menggunakan huruf!',
+    errRoom6: 'Kode room harus tepat 6 karakter!',
+    errRoomChar: 'Kode room hanya boleh huruf dan angka!',
+    errNoGeo: 'Browser tidak mendukung geolocation',
+    timeUnknown: 'Tidak diketahui',
+    timeJustNow: 'Baru saja',
+    timeMinAgo: (m) => `${m} menit lalu`,
+    timeHourAgo: (h) => `${h} jam lalu`,
+    timeDayAgo: (d) => `${d} hari lalu`,
+    waMsg: (room, url) => `Hei! Bergabunglah ke TraceLink untuk saling melihat lokasi kita.\n\nKode Room: *${room}*\n\nBuka: ${url}`,
+    teleMsg: (room) => `Bergabung ke TraceLink - Kode Room: ${room}`,
+    roles: [
+      { value: 'Anggota',      label: '👤 Anggota' },
+      { value: 'Teman',        label: '🤝 Teman' },
+      { value: 'Pasangan',     label: '💑 Pasangan' },
+      { value: 'Keluarga',     label: '👨‍👩‍👧 Keluarga' },
+      { value: 'Rekan Kerja',  label: '💼 Rekan Kerja' },
+    ]
+  },
+  en: {
+    splashSub: 'Share your location with anyone',
+    permTitle: 'Allow Location Access',
+    permDesc: 'TraceLink needs to access your device location so group members can see your position in real-time.',
+    permNoticeLabel: 'Security & Privacy',
+    permNoticeBody: 'Location is only shared with members who join the same room. You can stop sharing at any time.',
+    btnAllow: 'Allow Location',
+    btnDeny: 'Not Now',
+    deniedTitle: 'Location Required',
+    deniedDesc: 'Without location permission, TraceLink cannot work. Location access is needed so group members can see your position in real-time.',
+    btnRetry: 'Try Again',
+    stepBadge: 'LAST STEP',
+    setupTitle: 'Set Up Your Profile',
+    setupDesc: 'Fill in the info below, then join or create a new room.',
+    labelName: 'Your Name',
+    placeholderName: 'e.g. Alex, Jamie, Sam...',
+    labelRole: 'Your Role in the Group',
+    labelRoom: 'Room Code',
+    placeholderRoom: 'Type or click Random...',
+    roomHint: 'Share this code with others so they can join.',
+    btnRandom: 'Random',
+    btnStart: 'Start Sharing Location',
+    confirmLeaveTitle: 'Leave Room?',
+    confirmLeaveDesc: 'Your location data will be <strong>deleted</strong> from this room and other members will no longer be able to see your position.',
+    btnCancel: 'Cancel',
+    btnLeave: 'Yes, Leave',
+    shareTitle: 'Invite Members',
+    shareDesc: 'Share this room code so others can join and see each other\'s location.',
+    btnCopyLink: 'Copy Link',
+    btnClose: 'Close',
+    installTitle: 'Install App',
+    installDesc: 'Install TraceLink to your home screen so it opens like a regular app.',
+    androidSteps: [
+      'Open this website in <strong>Chrome</strong>',
+      'Tap the <strong>⋮</strong> menu (three dots) at top right',
+      'Select <strong>"Add to Home Screen"</strong>',
+      'Tap <strong>"Add"</strong> to confirm'
+    ],
+    iosSteps: [
+      'Open this website in <strong>Safari</strong>',
+      'Tap the <strong>Share</strong> ↑ button at the bottom',
+      'Scroll down and select <strong>"Add to Home Screen"</strong>',
+      'Tap <strong>"Add"</strong> at the top right'
+    ],
+    sidebarTitle: 'Members',
+    onlineLabel: 'online',
+    badgeMe: 'Me',
+    labelCoords: 'Coords',
+    labelLocation: 'Location',
+    labelAccuracy: 'Accuracy',
+    labelUpdate: 'Updated',
+    loading: 'Loading...',
+    otherMembers: 'OTHER MEMBERS',
+    noMembersText: 'No other members yet.\nInvite people with the room code!',
+    btnInvite: 'Invite Members',
+    btnStop: 'Stop Sharing Location',
+    mapStatus: 'Location auto-updated',
+    layerTitle: 'Map View',
+    layerStreet: 'Street',
+    layerSatellite: 'Satellite',
+    ppOnline: 'Online',
+    ppMe: 'Me',
+    ppCoords: 'Coords',
+    ppLocation: 'Location',
+    ppAccuracy: 'Accuracy',
+    ppAccGood: 'Excellent',
+    ppAccMid: 'Good',
+    ppAccLow: 'Low',
+    mcOnline: 'Online',
+    mcOffline: 'Offline',
+    mcCoords: 'Coords',
+    mcLocation: 'Location',
+    mcAccuracy: 'Accuracy',
+    mcLast: 'Last seen',
+    stopDone: 'Sharing Stopped',
+    toastWelcome: (name) => `Welcome, ${name}!`,
+    toastInstalling: 'Installing TraceLink...',
+    toastInstalled: 'TraceLink installed! 🎉',
+    toastCopied: 'Link copied! 🔗',
+    toastStopped: 'You stopped sharing location',
+    errName: 'Please enter your name!',
+    errNameChar: 'Name can only contain letters!',
+    errRoom6: 'Room code must be exactly 6 characters!',
+    errRoomChar: 'Room code can only contain letters and numbers!',
+    errNoGeo: 'Browser does not support geolocation',
+    timeUnknown: 'Unknown',
+    timeJustNow: 'Just now',
+    timeMinAgo: (m) => `${m} min ago`,
+    timeHourAgo: (h) => `${h} hr ago`,
+    timeDayAgo: (d) => `${d} days ago`,
+    waMsg: (room, url) => `Hey! Join TraceLink to see each other's location.\n\nRoom Code: *${room}*\n\nOpen: ${url}`,
+    teleMsg: (room) => `Join TraceLink - Room Code: ${room}`,
+    roles: [
+      { value: 'Member',      label: '👤 Member' },
+      { value: 'Friend',      label: '🤝 Friend' },
+      { value: 'Partner',     label: '💑 Partner' },
+      { value: 'Family',      label: '👨‍👩‍👧 Family' },
+      { value: 'Colleague',   label: '💼 Colleague' },
+    ]
+  }
+};
+
+// ============================================================
+// STATE
+// ============================================================
+const LS_KEY       = 'tracelink_profile';
+const LS_LANG      = 'tracelink_lang';
+const LS_THEME     = 'tracelink_theme';
+
 const COLORS = [
   '#289DF2','#10b981','#f59e0b','#e8394a','#8b5cf6',
   '#ec4899','#14b8a6','#f97316','#06b6d4','#84cc16',
   '#a855f7','#ef4444','#22d3ee','#fb923c','#4ade80'
 ];
-
 const assignedColors = {};
 let colorIndex = 0;
 
@@ -16,39 +227,126 @@ function getAssignedColor(id) {
   }
   return assignedColors[id];
 }
+
 const OFFLINE_THRESHOLD = 60000;
 
 const state = {
-  name:          '',
-  role:          '',
-  room:          '',
-  myId:          '',
-  myLat:         null,
-  myLng:         null,
-  myBattery:     null,
-  myAccuracy:    null,
-  myLocationName: null,
-  members:       {},
-  myMarker:      null,
-  memberMarkers: {},
-  memberLocationNames: {},
-  map:           null,
-  watchId:       null,
-  shareActive:   true,
-  fbReady:       false,
-  wakeLock:      null,
-  deferredPrompt: null
+  name: '', role: '', room: '', myId: '',
+  myLat: null, myLng: null,
+  myBattery: null, myAccuracy: null, myLocationName: null,
+  members: {}, myMarker: null,
+  memberMarkers: {}, memberLocationNames: {},
+  map: null, watchId: null,
+  shareActive: true, fbReady: false,
+  wakeLock: null, deferredPrompt: null,
+  lang: localStorage.getItem(LS_LANG) || 'id',
+  theme: localStorage.getItem(LS_THEME) || 'light'
 };
 
+// ============================================================
+// I18N
+// ============================================================
+function t(key, ...args) {
+  const val = TRANSLATIONS[state.lang][key];
+  if (typeof val === 'function') return val(...args);
+  return val ?? key;
+}
+
+// Elements whose content is managed by live data — never override them with i18n
+const LIVE_DATA_IDS = new Set(['myCoordsVal', 'myLocationName', 'myAccuracy', 'myUpdate', 'lastUpdate', 'onlineCount', 'topbarRoomCode', 'modalRoomCode']);
+
+function applyTranslations() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    // Skip elements that display live GPS/location data
+    if (el.id && LIVE_DATA_IDS.has(el.id)) return;
+    const key = el.getAttribute('data-i18n');
+    const val = TRANSLATIONS[state.lang][key];
+    if (val !== undefined) el.innerHTML = val;
+  });
+
+  // Placeholders
+  const inputName = document.getElementById('inputName');
+  if (inputName) inputName.placeholder = t('placeholderName');
+  const inputRoom = document.getElementById('inputRoom');
+  if (inputRoom) inputRoom.placeholder = t('placeholderRoom');
+
+  // Role select
+  const sel = document.getElementById('inputRole');
+  if (sel) {
+    const curVal = sel.value;
+    sel.innerHTML = '';
+    t('roles').forEach(r => {
+      const opt = document.createElement('option');
+      opt.value = r.value;
+      opt.textContent = r.label;
+      sel.appendChild(opt);
+    });
+    sel.value = curVal;
+  }
+
+  // Install steps
+  const androidEl = document.getElementById('androidSteps');
+  if (androidEl) {
+    androidEl.innerHTML = t('androidSteps').map(s => `<li>${s}</li>`).join('');
+  }
+  const iosEl = document.getElementById('iosSteps');
+  if (iosEl) {
+    iosEl.innerHTML = t('iosSteps').map(s => `<li>${s}</li>`).join('');
+  }
+
+  // Lang labels
+  const label = state.lang === 'id' ? 'ID' : 'EN';
+  ['langLabelPerm','langLabelApp','langLabelMob'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = label;
+  });
+}
+
+function toggleLang() {
+  state.lang = state.lang === 'id' ? 'en' : 'id';
+  localStorage.setItem(LS_LANG, state.lang);
+  applyTranslations();
+  // Re-render dynamic content that uses translated strings
+  if (state.myLat) updateMyCard();
+  renderMembers();
+  // Update stop button if already in stopped state
+  const stopBtn = document.getElementById('stopBtn');
+  if (stopBtn && stopBtn.disabled) {
+    stopBtn.innerHTML = '<i class="fas fa-check"></i> ' + t('stopDone');
+  }
+}
+
+// ============================================================
+// THEME
+// ============================================================
+function applyTheme() {
+  document.body.setAttribute('data-theme', state.theme);
+  const isDark = state.theme === 'dark';
+  const iconClass = isDark ? 'fas fa-sun' : 'fas fa-moon';
+  ['themeIconPerm','themeIconApp','themeIconMob'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.className = iconClass;
+  });
+}
+
+function toggleTheme() {
+  state.theme = state.theme === 'light' ? 'dark' : 'light';
+  localStorage.setItem(LS_THEME, state.theme);
+  applyTheme();
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
 function timeAgo(ts) {
-  if (!ts) return 'Tidak diketahui';
+  if (!ts) return t('timeUnknown');
   const diff = Date.now() - ts;
   const mins = Math.floor(diff / 60000);
   const hrs  = Math.floor(diff / 3600000);
-  if (diff < 60000)    return 'Baru saja';
-  if (diff < 3600000)  return `${mins} menit lalu`;
-  if (diff < 86400000) return `${hrs} jam lalu`;
-  return `${Math.floor(diff / 86400000)} hari lalu`;
+  if (diff < 60000)    return t('timeJustNow');
+  if (diff < 3600000)  return t('timeMinAgo', mins);
+  if (diff < 86400000) return t('timeHourAgo', hrs);
+  return t('timeDayAgo', Math.floor(diff / 86400000));
 }
 
 function isOnline(ts) {
@@ -57,10 +355,8 @@ function isOnline(ts) {
 
 function saveProfile() {
   localStorage.setItem(LS_KEY, JSON.stringify({
-    name: state.name,
-    role: state.role,
-    room: state.room,
-    myId: state.myId
+    name: state.name, role: state.role,
+    room: state.room, myId: state.myId
   }));
 }
 
@@ -79,20 +375,16 @@ async function reverseGeocode(lat, lng) {
   try {
     const res = await fetch(
       `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1`,
-      { headers: { 'Accept-Language': 'id' } }
+      { headers: { 'Accept-Language': state.lang === 'id' ? 'id' : 'en' } }
     );
     if (!res.ok) return null;
     const data = await res.json();
     if (!data || !data.address) return null;
     const a = data.address;
-    const name =
-      a.village || a.suburb || a.quarter || a.neighbourhood ||
-      a.hamlet || a.residential || a.road ||
-      a.county || a.city || a.town || null;
-    return name || null;
-  } catch {
-    return null;
-  }
+    return a.village || a.suburb || a.quarter || a.neighbourhood ||
+           a.hamlet || a.residential || a.road ||
+           a.county || a.city || a.town || null;
+  } catch { return null; }
 }
 
 async function requestWakeLock() {
@@ -120,14 +412,19 @@ window.addEventListener('beforeinstallprompt', e => {
 
 window.addEventListener('appinstalled', () => {
   state.deferredPrompt = null;
-  toast('FamilyTrace berhasil diinstall! 🎉', 'success');
+  toast(t('toastInstalled'), 'success');
 });
 
-window.addEventListener('firebaseReady', () => {
-  state.fbReady = true;
-});
+window.addEventListener('firebaseReady', () => { state.fbReady = true; });
 
+// ============================================================
+// INIT
+// ============================================================
 window.addEventListener('load', () => {
+  // Apply theme + lang immediately
+  applyTheme();
+  applyTranslations();
+
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(() => {});
   }
@@ -158,7 +455,7 @@ window.addEventListener('load', () => {
 
 function resumeApp() {
   if (!navigator.geolocation) {
-    toast('Browser tidak mendukung geolocation', 'error');
+    toast(t('errNoGeo'), 'error');
     clearProfile();
     document.getElementById('permission-screen').classList.add('show');
     return;
@@ -180,7 +477,7 @@ function resumeApp() {
 
 function requestLocation() {
   if (!navigator.geolocation) {
-    toast('Browser tidak mendukung geolocation', 'error');
+    toast(t('errNoGeo'), 'error');
     return;
   }
   navigator.geolocation.getCurrentPosition(
@@ -195,19 +492,12 @@ function requestLocation() {
         const code = urlRoom.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
         const inp  = document.getElementById('inputRoom');
         const btn  = document.querySelector('.btn-generate');
-        inp.value    = code;
-        inp.readOnly = true;
-        inp.style.cursor = 'default';
-        inp.style.opacity = '0.85';
-        if (btn) {
-          btn.disabled = true;
-          btn.style.opacity = '0.4';
-          btn.style.cursor  = 'not-allowed';
-        }
+        inp.value = code; inp.readOnly = true;
+        inp.style.cursor = 'default'; inp.style.opacity = '0.85';
+        if (btn) { btn.disabled = true; btn.style.opacity = '0.4'; btn.style.cursor = 'not-allowed'; }
       } else {
         generateRoom();
       }
-
       document.getElementById('setup-screen').classList.add('show');
     },
     () => showDenied(),
@@ -241,9 +531,7 @@ function makeRoomCode() {
 async function generateRoom() {
   const btn = document.querySelector('.btn-generate');
   if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; }
-
   let code = makeRoomCode();
-
   if (state.fbReady) {
     const { db, ref, onValue } = window._FB;
     let attempts = 0;
@@ -257,9 +545,8 @@ async function generateRoom() {
       attempts++;
     }
   }
-
   document.getElementById('inputRoom').value = code;
-  if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-dice"></i> Acak'; }
+  if (btn) { btn.disabled = false; btn.innerHTML = `<i class="fas fa-dice"></i> ${t('btnRandom')}`; }
 }
 
 document.getElementById('inputRoom').addEventListener('input', function () {
@@ -272,12 +559,11 @@ async function startApp() {
   const role = document.getElementById('inputRole').value;
   const room = document.getElementById('inputRoom').value.trim();
 
-  if (!name) { toast('Masukkan nama kamu dulu!', 'error'); return; }
-  if (!/^[a-zA-Z ]+$/.test(name)) { toast('Nama hanya boleh menggunakan huruf!', 'error'); return; }
+  if (!name) { toast(t('errName'), 'error'); return; }
+  if (!/^[a-zA-Z ]+$/.test(name)) { toast(t('errNameChar'), 'error'); return; }
   const nameFormatted = name.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
-  if (!/^[a-zA-Z\s]+$/.test(name)) { toast('Nama hanya boleh menggunakan huruf!', 'error'); return; }
-  if (room.length !== 6) { toast('Kode room harus tepat 6 karakter!', 'error'); return; }
-  if (!/^[A-Z0-9]+$/.test(room)) { toast('Kode room hanya boleh huruf dan angka!', 'error'); return; }
+  if (room.length !== 6) { toast(t('errRoom6'), 'error'); return; }
+  if (!/^[A-Z0-9]+$/.test(room)) { toast(t('errRoomChar'), 'error'); return; }
 
   state.name = nameFormatted;
   state.role = role;
@@ -300,7 +586,7 @@ function launchApp() {
   document.getElementById('topbarRoomCode').textContent = state.room;
   document.getElementById('modalRoomCode').textContent  = state.room;
 
-  toast(`Selamat datang, ${state.name}!`, 'success');
+  toast(t('toastWelcome', state.name), 'success');
 
   if (state.fbReady) initFirebaseSync();
   else window.addEventListener('firebaseReady', initFirebaseSync, { once: true });
@@ -325,29 +611,21 @@ document.getElementById('confirmLeaveModal')?.addEventListener('click', function
 
 function doLeaveRoom() {
   closeConfirmLeave();
-
   if (state.fbReady) {
     const { db, ref, remove } = window._FB;
     remove(ref(db, `rooms/${state.room}/members/${state.myId}`));
   }
-
-  if (state.watchId !== null) {
-    navigator.geolocation.clearWatch(state.watchId);
-    state.watchId = null;
-  }
-
-  if (state.wakeLock) {
-    state.wakeLock.release().catch(() => {});
-    state.wakeLock = null;
-  }
-
+  if (state.watchId !== null) { navigator.geolocation.clearWatch(state.watchId); state.watchId = null; }
+  if (state.wakeLock) { state.wakeLock.release().catch(() => {}); state.wakeLock = null; }
   clearProfile();
   window.location.href = window.location.origin + window.location.pathname;
 }
 
+// ============================================================
+// FIREBASE
+// ============================================================
 function initFirebaseSync() {
   const { db, ref, onValue } = window._FB;
-
   pushMyLocation();
 
   onValue(ref(db, `rooms/${state.room}/members`), snapshot => {
@@ -372,7 +650,6 @@ function initFirebaseSync() {
         if (m.lat && m.lng) {
           reverseGeocode(m.lat, m.lng).then(locName => {
             state.memberLocationNames[id] = { lat: m.lat, lng: m.lng, name: locName };
-
             if (state.memberMarkers[id]) {
               const mem = state.members[id];
               const online = isOnline(mem.ts);
@@ -385,7 +662,6 @@ function initFirebaseSync() {
         }
       }
     });
-
     renderMembers();
   });
 }
@@ -394,20 +670,18 @@ function pushMyLocation() {
   if (!state.fbReady || !state.shareActive) return;
   const { db, ref, set } = window._FB;
   set(ref(db, `rooms/${state.room}/members/${state.myId}`), {
-    name:     state.name,
-    role:     state.role,
-    lat:      state.myLat,
-    lng:      state.myLng,
-    battery:  state.myBattery,
-    accuracy: state.myAccuracy,
-    online:   true,
-    ts:       Date.now()
+    name: state.name, role: state.role,
+    lat: state.myLat, lng: state.myLng,
+    battery: state.myBattery, accuracy: state.myAccuracy,
+    online: true, ts: Date.now()
   });
 }
 
+// ============================================================
+// MAP
+// ============================================================
 function initMap() {
   state.map = L.map('map', { zoomControl: false, attributionControl: true });
-
   state.layers = {
     street: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap', maxZoom: 19
@@ -416,10 +690,8 @@ function initMap() {
       attribution: '© Esri', maxZoom: 19
     })
   };
-
   state.activeLayer = 'street';
   state.layers.street.addTo(state.map);
-
   if (state.myLat && state.myLng) {
     state.map.setView([state.myLat, state.myLng], 16);
     placeMyMarker(state.myLat, state.myLng);
@@ -427,19 +699,14 @@ function initMap() {
 }
 
 function openLayerPanel() {
-  const panel = document.getElementById('layerPanel');
-  panel.classList.toggle('show');
+  document.getElementById('layerPanel').classList.toggle('show');
 }
 
 function setLayer(type) {
-  if (state.activeLayer === type) {
-    document.getElementById('layerPanel').classList.remove('show');
-    return;
-  }
+  if (state.activeLayer === type) { document.getElementById('layerPanel').classList.remove('show'); return; }
   state.map.removeLayer(state.layers[state.activeLayer]);
   state.layers[type].addTo(state.map);
   state.activeLayer = type;
-
   document.querySelectorAll('.layer-option').forEach(el => el.classList.remove('active'));
   document.getElementById(type === 'street' ? 'layerStreet' : 'layerSatellite').classList.add('active');
   document.getElementById('layerPanel').classList.remove('show');
@@ -455,7 +722,7 @@ document.addEventListener('click', e => {
 
 function createMarkerIcon(initial, color, offline) {
   const opacity = offline ? '0.45' : '1';
-  const badge   = offline
+  const badge = offline
     ? `<div class="marker-offline-badge"><i class="fas fa-moon"></i></div>`
     : `<div class="marker-pulse" style="background:${color}"></div>`;
   return L.divIcon({
@@ -469,11 +736,10 @@ function createMarkerIcon(initial, color, offline) {
 }
 
 function placeMyMarker(lat, lng) {
-  const color   = '#0F3775';
+  const color = '#0F3775';
   const initial = (state.name || '?')[0].toUpperCase();
-  const icon    = createMarkerIcon(initial, color, false);
+  const icon = createMarkerIcon(initial, color, false);
   const locName = state.myLocationName;
-
   if (state.myMarker) {
     state.myMarker.setLatLng([lat, lng]);
   } else {
@@ -487,34 +753,27 @@ function placeMyMarker(lat, lng) {
 }
 
 function buildPopup(name, role, lat, lng, battery, accuracy, isMe, online, ts, locationName) {
-  const accStr   = accuracy !== null && accuracy !== undefined ? `${accuracy}m` : '—';
-  const accColor = accuracy !== null && accuracy !== undefined
+  const accStr   = accuracy != null ? `${accuracy}m` : '—';
+  const accColor = accuracy != null
     ? (accuracy <= 20 ? '#10b981' : accuracy <= 100 ? '#f59e0b' : '#e8394a')
     : '#6b7fa3';
-  const accLabel = accuracy !== null && accuracy !== undefined
-    ? (accuracy <= 20 ? 'Sangat Baik' : accuracy <= 100 ? 'Baik' : 'Rendah')
+  const accLabel = accuracy != null
+    ? (accuracy <= 20 ? t('ppAccGood') : accuracy <= 100 ? t('ppAccMid') : t('ppAccLow'))
     : '—';
-
-  const locHtml = locationName
-    ? `<div class="pp-location"><i class="fas fa-map-marker-alt"></i>${locationName}</div>`
-    : '';
 
   const statusHtml = !isMe
     ? online
-      ? `<div class="pp-status online"><span class="pp-status-dot"></span>Online</div>`
+      ? `<div class="pp-status online"><span class="pp-status-dot"></span>${t('ppOnline')}</div>`
       : `<div class="pp-status offline"><i class="fas fa-clock"></i>${timeAgo(ts)}</div>`
-    : `<div class="pp-status online"><span class="pp-status-dot"></span>Saya</div>`;
+    : `<div class="pp-status online"><span class="pp-status-dot"></span>${t('ppMe')}</div>`;
 
-  const roleHtml = role
-    ? `<div class="pp-role">${role}</div>`
-    : '';
+  const roleHtml = role ? `<div class="pp-role">${role}</div>` : '';
 
   return `<div class="pp-wrap">
     <div class="pp-header">
       <div class="pp-avatar">${name[0].toUpperCase()}</div>
       <div class="pp-header-info">
-        <div class="pp-name">${name}</div>
-        ${roleHtml}
+        <div class="pp-name">${name}</div>${roleHtml}
       </div>
       ${statusHtml}
     </div>
@@ -522,17 +781,17 @@ function buildPopup(name, role, lat, lng, battery, accuracy, isMe, online, ts, l
     <div class="pp-body">
       <div class="pp-row">
         <i class="fas fa-crosshairs pp-row-icon"></i>
-        <span class="pp-row-label">Koordinat</span>
+        <span class="pp-row-label">${t('ppCoords')}</span>
         <span class="pp-row-val mono">${lat.toFixed(5)}, ${lng.toFixed(5)}</span>
       </div>
       ${locationName ? `<div class="pp-row">
         <i class="fas fa-map-marker-alt pp-row-icon" style="color:#289DF2"></i>
-        <span class="pp-row-label">Lokasi</span>
+        <span class="pp-row-label">${t('ppLocation')}</span>
         <span class="pp-row-val">${locationName}</span>
       </div>` : ''}
       <div class="pp-row">
         <i class="fas fa-satellite-dish pp-row-icon" style="color:${accColor}"></i>
-        <span class="pp-row-label">Akurasi</span>
+        <span class="pp-row-label">${t('ppAccuracy')}</span>
         <span class="pp-row-val" style="color:${accColor}">${accStr} <span style="opacity:.7;font-size:.7rem">(${accLabel})</span></span>
       </div>
     </div>
@@ -573,6 +832,9 @@ function fitAll() {
     state.map.flyToBounds(L.latLngBounds(pts).pad(0.2), { duration: 1 });
 }
 
+// ============================================================
+// TRACKING
+// ============================================================
 function startTracking() {
   state.watchId = navigator.geolocation.watchPosition(
     pos => {
@@ -580,7 +842,6 @@ function startTracking() {
       const newLng = pos.coords.longitude;
       const prevLat = state.myLat;
       const prevLng = state.myLng;
-
       state.myLat      = newLat;
       state.myLng      = newLng;
       state.myAccuracy = Math.round(pos.coords.accuracy);
@@ -593,7 +854,6 @@ function startTracking() {
           placeMyMarker(state.myLat, state.myLng);
         });
       }
-
       updateMyCard();
       placeMyMarker(state.myLat, state.myLng);
       updateLastUpdate();
@@ -609,56 +869,31 @@ async function getBattery() {
     if ('getBattery' in navigator) {
       const bat = await navigator.getBattery();
       state.myBattery = Math.round(bat.level * 100);
-      updateMyCard();
-      pushMyLocation();
-      bat.addEventListener('levelchange', () => {
-        state.myBattery = Math.round(bat.level * 100);
-        updateMyCard();
-        pushMyLocation();
-      });
-      bat.addEventListener('chargingchange', () => {
-        state.myBattery = Math.round(bat.level * 100);
-        updateMyCard();
-        pushMyLocation();
-      });
-    } else {
-      state.myBattery = null;
-      updateMyCard();
-    }
-  } catch (e) {
-    state.myBattery = null;
-    updateMyCard();
-  }
+      updateMyCard(); pushMyLocation();
+      bat.addEventListener('levelchange', () => { state.myBattery = Math.round(bat.level * 100); updateMyCard(); pushMyLocation(); });
+      bat.addEventListener('chargingchange', () => { state.myBattery = Math.round(bat.level * 100); updateMyCard(); pushMyLocation(); });
+    } else { state.myBattery = null; updateMyCard(); }
+  } catch { state.myBattery = null; updateMyCard(); }
 }
 
 function stopSharing() {
-  if (state.watchId !== null) {
-    navigator.geolocation.clearWatch(state.watchId);
-    state.watchId = null;
-  }
+  if (state.watchId !== null) { navigator.geolocation.clearWatch(state.watchId); state.watchId = null; }
   state.shareActive = false;
-
-  if (state.wakeLock) {
-    state.wakeLock.release().catch(() => {});
-    state.wakeLock = null;
-  }
-
+  if (state.wakeLock) { state.wakeLock.release().catch(() => {}); state.wakeLock = null; }
   if (state.fbReady) {
     const { db, ref, update } = window._FB;
     update(ref(db, `rooms/${state.room}/members/${state.myId}`), { online: false });
   }
-
-  if (state.myMarker) {
-    state.map.removeLayer(state.myMarker);
-    state.myMarker = null;
-  }
-
-  toast('Kamu berhenti berbagi lokasi', 'info');
+  if (state.myMarker) { state.map.removeLayer(state.myMarker); state.myMarker = null; }
+  toast(t('toastStopped'), 'info');
   const btn = document.getElementById('stopBtn');
-  btn.innerHTML = '<i class="fas fa-check"></i> Berbagi Dihentikan';
-  btn.disabled  = true;
+  btn.innerHTML = `<i class="fas fa-check"></i> ${t('stopDone')}`;
+  btn.disabled = true;
 }
 
+// ============================================================
+// MY CARD
+// ============================================================
 function initMyCard() {
   document.getElementById('myCardName').textContent = state.name;
   document.getElementById('myCardRole').textContent = state.role;
@@ -670,35 +905,34 @@ function updateMyCard() {
     const coordVal = document.getElementById('myCoordsVal');
     if (coordVal) coordVal.textContent = `${state.myLat.toFixed(5)},  ${state.myLng.toFixed(5)}`;
   }
-
   const locRow = document.getElementById('myLocationNameRow');
   const locEl  = document.getElementById('myLocationName');
   if (locRow && locEl) {
     if (state.myLocationName) {
-      locEl.textContent   = state.myLocationName;
+      locEl.textContent    = state.myLocationName;
       locRow.style.display = 'flex';
     } else {
       locRow.style.display = 'none';
     }
   }
-
   const accEl = document.getElementById('myAccuracy');
   if (accEl && state.myAccuracy !== null) {
     const acc = state.myAccuracy;
-    const color = acc <= 20 ? '#93c5fd' : acc <= 100 ? '#fcd34d' : '#fca5a5';
     accEl.textContent = acc + 'm';
-    accEl.style.color = color;
+    accEl.style.color = acc <= 20 ? '#93c5fd' : acc <= 100 ? '#fcd34d' : '#fca5a5';
   }
-
   document.getElementById('myUpdate').textContent =
-    new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+    new Date().toLocaleTimeString(state.lang === 'id' ? 'id-ID' : 'en-US', { hour: '2-digit', minute: '2-digit' });
 }
 
 function updateLastUpdate() {
   document.getElementById('lastUpdate').textContent =
-    new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    new Date().toLocaleTimeString(state.lang === 'id' ? 'id-ID' : 'en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 }
 
+// ============================================================
+// RENDER MEMBERS
+// ============================================================
 function renderMembers() {
   const list    = document.getElementById('membersList');
   const noMem   = document.getElementById('noMembers');
@@ -711,23 +945,19 @@ function renderMembers() {
     document.getElementById('onlineCount').textContent = '1';
     return;
   }
-
   noMem.style.display = 'none';
 
   const onlineMembers  = entries.filter(([, m]) => isOnline(m.ts));
   const offlineMembers = entries.filter(([, m]) => !isOnline(m.ts));
-
   document.getElementById('onlineCount').textContent = onlineMembers.length + 1;
 
   [...onlineMembers, ...offlineMembers].forEach(([id, m]) => {
-    const color    = getAssignedColor(id);
-    const initial  = (m.name || '?')[0].toUpperCase();
-    const online   = isOnline(m.ts);
-    const acc      = m.accuracy;
-    const locName  = state.memberLocationNames[id]?.name || null;
-    const accClass = (acc !== null && acc !== undefined) ? (acc <= 20 ? 'acc-good' : acc <= 100 ? 'acc-mid' : 'acc-low') : 'acc-mid';
-    const accText  = (acc !== null && acc !== undefined) ? acc + 'm' : '—';
-    const accIcon  = (acc !== null && acc !== undefined) ? 'fa-satellite-dish' : 'fa-satellite-dish';
+    const color   = getAssignedColor(id);
+    const initial = (m.name || '?')[0].toUpperCase();
+    const online  = isOnline(m.ts);
+    const acc     = m.accuracy;
+    const locName = state.memberLocationNames[id]?.name || null;
+    const accText = acc != null ? acc + 'm' : '—';
 
     const div = document.createElement('div');
     div.className = `member-item${online ? '' : ' member-offline'}`;
@@ -744,8 +974,8 @@ function renderMembers() {
           <div class="mc-header-right">
             <div class="mc-status-pill ${online ? 'online' : 'offline'}">
               ${online
-                ? '<span class="mc-status-dot"></span>Online'
-                : '<i class="fas fa-moon" style="font-size:.55rem"></i>Offline'}
+                ? `<span class="mc-status-dot"></span>${t('mcOnline')}`
+                : `<i class="fas fa-moon" style="font-size:.55rem"></i>${t('mcOffline')}`}
             </div>
             <button class="mc-locate-btn" onclick="locateMember('${id}')">
               <i class="fas fa-location-dot"></i>
@@ -756,18 +986,19 @@ function renderMembers() {
         <div class="mc-rows">
           ${online && m.lat ? `<div class="mc-row">
             <i class="fas fa-crosshairs mc-row-icon"></i>
-            <span class="mc-row-label">Koordinat</span>
+            <span class="mc-row-label">${t('mcCoords')}</span>
             <span class="mc-row-val mono">${m.lat.toFixed(5)},  ${m.lng.toFixed(5)}</span>
           </div>` : ''}
           ${locName ? `<div class="mc-row">
             <i class="fas fa-map-marker-alt mc-row-icon" style="color:#289DF2"></i>
-            <span class="mc-row-label">Lokasi</span>
+            <span class="mc-row-label">${t('mcLocation')}</span>
             <span class="mc-row-val">${locName}</span>
           </div>` : ''}
           <div class="mc-row">
-            <i class="fas fa-${online ? 'satellite-dish' : 'clock'} mc-row-icon" style="color:${online ? (acc !== null && acc !== undefined ? (acc <= 20 ? '#10b981' : acc <= 100 ? '#f59e0b' : '#e8394a') : 'var(--muted)') : 'var(--muted)'}"></i>
-            <span class="mc-row-label">${online ? 'Akurasi' : 'Terakhir'}</span>
-            <span class="mc-row-val" style="color:${online ? (acc !== null && acc !== undefined ? (acc <= 20 ? '#10b981' : acc <= 100 ? '#f59e0b' : '#e8394a') : 'var(--muted)') : 'var(--muted)'}">
+            <i class="fas fa-${online ? 'satellite-dish' : 'clock'} mc-row-icon"
+               style="color:${online ? (acc != null ? (acc <= 20 ? '#10b981' : acc <= 100 ? '#f59e0b' : '#e8394a') : 'var(--muted)') : 'var(--muted)'}"></i>
+            <span class="mc-row-label">${online ? t('mcAccuracy') : t('mcLast')}</span>
+            <span class="mc-row-val" style="color:${online ? (acc != null ? (acc <= 20 ? '#10b981' : acc <= 100 ? '#f59e0b' : '#e8394a') : 'var(--muted)') : 'var(--muted)'}">
               ${online ? accText : timeAgo(m.ts)}
             </span>
           </div>
@@ -786,6 +1017,9 @@ function locateMember(id) {
   }
 }
 
+// ============================================================
+// MODALS
+// ============================================================
 function openModal()  { document.getElementById('shareModal').classList.add('show'); }
 function closeModal() { document.getElementById('shareModal').classList.remove('show'); }
 
@@ -793,9 +1027,7 @@ function openInstallModal() {
   if (state.deferredPrompt) {
     state.deferredPrompt.prompt();
     state.deferredPrompt.userChoice.then(result => {
-      if (result.outcome === 'accepted') {
-        toast('Menginstall FamilyTrace...', 'info');
-      }
+      if (result.outcome === 'accepted') toast(t('toastInstalling'), 'info');
       state.deferredPrompt = null;
     });
     return;
@@ -807,37 +1039,28 @@ function closeInstallModal() {
   document.getElementById('installModal').classList.remove('show');
 }
 
-document.getElementById('shareModal').addEventListener('click', function (e) {
-  if (e.target === this) closeModal();
-});
-
-document.getElementById('installModal').addEventListener('click', function (e) {
-  if (e.target === this) closeInstallModal();
-});
-
-function copyCode() {
-  navigator.clipboard.writeText(state.room)
-    .then(() => toast('Kode room disalin! 📋', 'success'));
-}
+document.getElementById('shareModal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+document.getElementById('installModal').addEventListener('click', function(e) { if (e.target === this) closeInstallModal(); });
 
 function copyLink() {
   const link = `${location.origin}${location.pathname}?room=${state.room}`;
-  navigator.clipboard.writeText(link).then(() => toast('Link disalin! 🔗', 'success'));
+  navigator.clipboard.writeText(link).then(() => toast(t('toastCopied'), 'success'));
 }
 
 function shareWA() {
-  const msg = encodeURIComponent(
-    `Hei! Bergabunglah ke FamilyTrace untuk saling melihat lokasi kita.\n\nKode Room: *${state.room}*\n\nBuka: ${location.origin}${location.pathname}?room=${state.room}`
-  );
-  window.open(`https://wa.me/?text=${msg}`, '_blank');
+  const url = `${location.origin}${location.pathname}?room=${state.room}`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(t('waMsg', state.room, url))}`, '_blank');
 }
 
 function shareTelegram() {
   const url = encodeURIComponent(`${location.origin}${location.pathname}?room=${state.room}`);
-  const msg = encodeURIComponent(`Bergabung ke FamilyTrace - Kode Room: ${state.room}`);
+  const msg = encodeURIComponent(t('teleMsg', state.room));
   window.open(`https://t.me/share/url?url=${url}&text=${msg}`, '_blank');
 }
 
+// ============================================================
+// TOAST
+// ============================================================
 function toast(msg, type = '') {
   const c  = document.getElementById('toastContainer');
   const el = document.createElement('div');
@@ -851,6 +1074,9 @@ function toast(msg, type = '') {
   }, 3200);
 }
 
+// ============================================================
+// SIDEBAR
+// ============================================================
 function toggleSidebar() {
   document.getElementById('sidebar').classList.toggle('mob-open');
 }
@@ -864,7 +1090,7 @@ document.addEventListener('click', e => {
     const sb = document.getElementById('sidebar');
     const tg = document.getElementById('mobToggle');
     if (sb && sb.classList.contains('mob-open') &&
-        !sb.contains(e.target) && !tg.contains(e.target)) {
+        !sb.contains(e.target) && tg && !tg.contains(e.target)) {
       sb.classList.remove('mob-open');
     }
   }
