@@ -4,12 +4,12 @@ const COLORS = [
   '#ec4899','#14b8a6','#f97316','#06b6d4','#84cc16',
   '#a855f7','#ef4444','#22d3ee','#fb923c','#4ade80'
 ];
-// Assigned colors map: id -> color (ensures no two members share a color)
+
 const assignedColors = {};
 let colorIndex = 0;
 
 function getAssignedColor(id) {
-  if (id === state.myId) return '#0F3775'; // always navy for self
+  if (id === state.myId) return '#0F3775';
   if (!assignedColors[id]) {
     assignedColors[id] = COLORS[colorIndex % COLORS.length];
     colorIndex++;
@@ -39,8 +39,6 @@ const state = {
   wakeLock:      null,
   deferredPrompt: null
 };
-
-// Color assignment is handled by getAssignedColor(id)
 
 function timeAgo(ts) {
   if (!ts) return 'Tidak diketahui';
@@ -77,7 +75,6 @@ function clearProfile() {
   localStorage.removeItem(LS_KEY);
 }
 
-// Reverse geocoding using Nominatim
 async function reverseGeocode(lat, lng) {
   try {
     const res = await fetch(
@@ -88,7 +85,6 @@ async function reverseGeocode(lat, lng) {
     const data = await res.json();
     if (!data || !data.address) return null;
     const a = data.address;
-    // Priority: village/suburb > quarter > neighbourhood > road > county
     const name =
       a.village || a.suburb || a.quarter || a.neighbourhood ||
       a.hamlet || a.residential || a.road ||
@@ -196,11 +192,18 @@ function requestLocation() {
 
       const urlRoom = new URLSearchParams(location.search).get('room');
       if (urlRoom) {
-        // Pre-fill from invite link — make temporarily editable
-        const inp = document.getElementById('inputRoom');
-        inp.removeAttribute('readonly');
-        inp.value = urlRoom.toUpperCase().slice(0, 6);
-        inp.setAttribute('readonly', '');
+        const code = urlRoom.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
+        const inp  = document.getElementById('inputRoom');
+        const btn  = document.querySelector('.btn-generate');
+        inp.value    = code;
+        inp.readOnly = true;
+        inp.style.cursor = 'default';
+        inp.style.opacity = '0.85';
+        if (btn) {
+          btn.disabled = true;
+          btn.style.opacity = '0.4';
+          btn.style.cursor  = 'not-allowed';
+        }
       } else {
         generateRoom();
       }
@@ -222,23 +225,47 @@ function retryPermission() {
   document.getElementById('permission-screen').classList.add('show');
 }
 
-function generateRoom() {
+function makeRoomCode() {
   const letters = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
   const digits  = '23456789';
-  // 4 letters + 2 digits, then shuffle
   let parts = [];
   for (let i = 0; i < 4; i++) parts.push(letters[Math.floor(Math.random() * letters.length)]);
   for (let i = 0; i < 2; i++) parts.push(digits[Math.floor(Math.random() * digits.length)]);
-  // Fisher-Yates shuffle
   for (let i = parts.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [parts[i], parts[j]] = [parts[j], parts[i]];
   }
-  document.getElementById('inputRoom').value = parts.join('');
+  return parts.join('');
 }
 
-// inputRoom is readonly — only generateRoom() sets its value
-// URL room param auto-fill handled in requestLocation()
+async function generateRoom() {
+  const btn = document.querySelector('.btn-generate');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; }
+
+  let code = makeRoomCode();
+
+  if (state.fbReady) {
+    const { db, ref, onValue } = window._FB;
+    let attempts = 0;
+    while (attempts < 10) {
+      const exists = await new Promise(resolve => {
+        const r = ref(db, `rooms/${code}/members`);
+        onValue(r, snap => resolve(snap.exists()), { onlyOnce: true });
+      });
+      if (!exists) break;
+      code = makeRoomCode();
+      attempts++;
+    }
+  }
+
+  document.getElementById('inputRoom').value = code;
+  if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-dice"></i> Acak'; }
+}
+
+document.getElementById('inputRoom').addEventListener('input', function () {
+  this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
+  this.style.borderColor = this.value.length === 6 ? 'var(--navy)' : '';
+});
 
 async function startApp() {
   const name = document.getElementById('inputName').value.trim();
@@ -247,10 +274,10 @@ async function startApp() {
 
   if (!name) { toast('Masukkan nama kamu dulu!', 'error'); return; }
   if (!/^[a-zA-Z ]+$/.test(name)) { toast('Nama hanya boleh menggunakan huruf!', 'error'); return; }
-  // Auto capitalize each word
   const nameFormatted = name.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
   if (!/^[a-zA-Z\s]+$/.test(name)) { toast('Nama hanya boleh menggunakan huruf!', 'error'); return; }
-  if (room.length < 6) { toast('Klik tombol Acak untuk membuat kode room!', 'error'); return; }
+  if (room.length !== 6) { toast('Kode room harus tepat 6 karakter!', 'error'); return; }
+  if (!/^[A-Z0-9]+$/.test(room)) { toast('Kode room hanya boleh huruf dan angka!', 'error'); return; }
 
   state.name = nameFormatted;
   state.role = role;
@@ -315,7 +342,7 @@ function doLeaveRoom() {
   }
 
   clearProfile();
-  location.reload();
+  window.location.href = window.location.origin + window.location.pathname;
 }
 
 function initFirebaseSync() {
@@ -339,13 +366,13 @@ function initFirebaseSync() {
       if (id === state.myId) return;
       state.members[id] = m;
       placeMemberMarker(id, m);
-      // Fetch location name for member if not cached or coords changed
+
       const cached = state.memberLocationNames[id];
       if (!cached || cached.lat !== m.lat || cached.lng !== m.lng) {
         if (m.lat && m.lng) {
           reverseGeocode(m.lat, m.lng).then(locName => {
             state.memberLocationNames[id] = { lat: m.lat, lng: m.lng, name: locName };
-            // Update marker popup
+
             if (state.memberMarkers[id]) {
               const mem = state.members[id];
               const online = isOnline(mem.ts);
@@ -418,7 +445,6 @@ function setLayer(type) {
   document.getElementById('layerPanel').classList.remove('show');
 }
 
-// Close layer panel on map click
 document.addEventListener('click', e => {
   const panel = document.getElementById('layerPanel');
   const btn   = document.getElementById('layerToggleBtn');
@@ -443,7 +469,7 @@ function createMarkerIcon(initial, color, offline) {
 }
 
 function placeMyMarker(lat, lng) {
-  const color   = '#0F3775'; // always navy for self
+  const color   = '#0F3775';
   const initial = (state.name || '?')[0].toUpperCase();
   const icon    = createMarkerIcon(initial, color, false);
   const locName = state.myLocationName;
@@ -559,7 +585,6 @@ function startTracking() {
       state.myLng      = newLng;
       state.myAccuracy = Math.round(pos.coords.accuracy);
 
-      // Re-geocode if moved significantly or no name yet
       const moved = !prevLat || Math.abs(newLat - prevLat) > 0.0005 || Math.abs(newLng - prevLng) > 0.0005;
       if (moved || !state.myLocationName) {
         reverseGeocode(newLat, newLng).then(locName => {
@@ -638,7 +663,6 @@ function initMyCard() {
   document.getElementById('myCardName').textContent = state.name;
   document.getElementById('myCardRole').textContent = state.role;
   document.getElementById('myAvatar').textContent   = state.name[0].toUpperCase();
-  // self avatar color is always navy (set via CSS bg on .my-card-header)
 }
 
 function updateMyCard() {
@@ -647,7 +671,6 @@ function updateMyCard() {
     if (coordVal) coordVal.textContent = `${state.myLat.toFixed(5)},  ${state.myLng.toFixed(5)}`;
   }
 
-  // Location name row
   const locRow = document.getElementById('myLocationNameRow');
   const locEl  = document.getElementById('myLocationName');
   if (locRow && locEl) {
@@ -659,7 +682,6 @@ function updateMyCard() {
     }
   }
 
-  // Accuracy with color
   const accEl = document.getElementById('myAccuracy');
   if (accEl && state.myAccuracy !== null) {
     const acc = state.myAccuracy;

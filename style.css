@@ -323,7 +323,7 @@ input, select, textarea {
   box-shadow: 0 2px 16px rgba(15,55,117,0.25);
   position: sticky;
   top: 0;
-  z-index: 9999;
+  z-index: 100;
 }
 .topbar-left  { display: flex; align-items: center; gap: 0.8rem; }
 .topbar-logo  { width: 34px; height: 34px; background: rgba(255,255,255,0.12); border-radius: 9px; display: flex; align-items: center; justify-content: center; }
@@ -378,7 +378,7 @@ input, select, textarea {
   overflow: hidden; flex-shrink: 0;
   transition: transform 0.3s ease;
 }
-/* Make the content area (below header) fully scrollable */
+
 .sidebar-scroll {
   flex: 1;
   overflow-y: auto;
@@ -391,6 +391,7 @@ input, select, textarea {
 
 .sidebar-header {
   padding: 1.2rem 1.5rem;
+  padding-top: calc(1.2rem + env(safe-area-inset-top));
   border-bottom: 1px solid var(--border);
   display: flex; align-items: center; justify-content: space-between;
   flex-shrink: 0;
@@ -426,7 +427,6 @@ input, select, textarea {
   box-shadow: 0 4px 16px rgba(15,55,117,0.18);
 }
 
-/* Header strip */
 .my-card-header {
   display: flex; align-items: center; gap: 0.7rem;
   padding: 0.85rem 1rem;
@@ -450,12 +450,10 @@ input, select, textarea {
   flex-shrink: 0;
 }
 
-/* Divider */
 .my-card-divider {
   height: 1px; background: rgba(255,255,255,0.1); margin: 0 1rem;
 }
 
-/* Data rows */
 .my-card-rows {
   padding: 0.6rem 1rem 0.85rem;
   display: flex; flex-direction: column; gap: 0.38rem;
@@ -477,7 +475,6 @@ input, select, textarea {
 }
 .my-card-row-val.mono { font-family: 'DM Mono', monospace; font-size: 0.7rem; }
 
-/* Keep these for compatibility */
 .my-card-top { display: flex; align-items: center; gap: 0.8rem; }
 .my-coords { display: none; }
 .my-location-name { display: none !important; }
@@ -488,7 +485,6 @@ input, select, textarea {
 
 .members-list { padding: 0.5rem 1rem 0.5rem; }
 
-/* ── Member Card (mc-*) — matches popup style ───────────── */
 .member-item {
   display: flex; align-items: stretch; gap: 0;
   border-radius: 14px;
@@ -510,7 +506,6 @@ input, select, textarea {
   display: flex; flex-direction: column; gap: 0;
 }
 
-/* Header row */
 .mc-header {
   display: flex; align-items: center; gap: 0.65rem;
   margin-bottom: 0.65rem;
@@ -556,13 +551,11 @@ input, select, textarea {
 }
 .mc-locate-btn:hover { background: var(--navy); color: #fff; border-color: var(--navy); }
 
-/* Divider */
 .mc-divider {
   height: 1px; background: var(--border);
   margin-bottom: 0.55rem;
 }
 
-/* Data rows */
 .mc-rows { display: flex; flex-direction: column; gap: 0.38rem; }
 
 .mc-row {
@@ -584,7 +577,6 @@ input, select, textarea {
 }
 .mc-row-val.mono { font-family: 'DM Mono', monospace; font-size: 0.7rem; }
 
-/* Keep these for any remaining references */
 .acc-good { background: rgba(16,185,129,0.1); color: var(--success); }
 .acc-mid  { background: rgba(245,158,11,0.1);  color: var(--warn); }
 .acc-low  { background: rgba(232,57,74,0.1);   color: var(--danger); }
@@ -647,7 +639,6 @@ input, select, textarea {
 }
 .map-ctrl-btn:hover { background: var(--navy); color: #fff; border-color: var(--navy); }
 
-/* Map status bar — now at the TOP of the map */
 .map-status {
   position: absolute; top: 0.7rem; left: 50%; transform: translateX(-50%);
   display: flex; align-items: center; gap: 0.5rem;
@@ -692,8 +683,10 @@ input, select, textarea {
 .modal-overlay {
   position: fixed; inset: 0;
   background: rgba(10,22,40,0.5); backdrop-filter: blur(6px);
-  z-index: 9800;
-  display: none; align-items: center; justify-content: center; padding: 1.5rem;
+  z-index: 10001;
+  display: none; align-items: center; justify-content: center;
+  padding: 1.5rem;
+  padding-top: calc(1.5rem + env(safe-area-inset-top));
 }
 .modal-overlay.show { display: flex; }
 
@@ -755,7 +748,6 @@ input, select, textarea {
   background: var(--bg);
 }
 
-/* Header row — icon + platform name */
 .install-platform-header {
   display: flex; align-items: center; gap: 0.75rem;
   padding: 0.85rem 1rem;
@@ -776,7 +768,6 @@ input, select, textarea {
   color: var(--text);
 }
 
-/* Steps body */
 .install-platform-body {
   padding: 0.85rem 1rem;
 }
@@ -837,11 +828,11 @@ input, select, textarea {
 @media (max-width: 768px) {
   .sidebar {
     position: fixed;
-    top: calc(62px + env(safe-area-inset-top));
+    top: 0;
     left: 0;
     width: 100%;
-    height: calc(100% - 62px - env(safe-area-inset-top));
-    z-index: 800;
+    height: 100%;
+    z-index: 10000;
     transform: translateX(-100%);
   }
   .sidebar.mob-open { transform: translateX(0); }
@@ -849,7 +840,6 @@ input, select, textarea {
   .map-wrapper { width: 100%; }
   .sidebar-close-btn { display: flex; }
 
-  /* On mobile, status bar shifts right to clear the burger button */
   .map-status {
     left: auto;
     right: 1rem;
@@ -864,7 +854,6 @@ input, select, textarea {
 
   .map-controls { top: 3.4rem; }
 
-  /* Bigger locate button on mobile */
   .mc-locate-btn {
     width: 38px; height: 38px;
     font-size: 0.95rem;
@@ -884,7 +873,6 @@ input, select, textarea {
   color: #fff;
 }
 
-/* ── Custom Confirm Leave Modal ─────────────────────────── */
 .confirm-modal-box {
   text-align: center;
   padding: 2.5rem 2rem 2rem;
@@ -950,11 +938,10 @@ input, select, textarea {
 }
 .confirm-btn-danger:active { transform: translateY(0); }
 
-/* ── Layer Panel ─────────────────────────────────────────── */
 .layer-panel {
   position: absolute;
-  right: 3.5rem; /* left of the map-controls column */
-  top: 3.6rem;   /* aligned with top of map-controls */
+  right: 3.5rem;
+  top: 3.6rem;
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 16px;
@@ -983,7 +970,7 @@ input, select, textarea {
   border: 2.5px solid var(--border);
   border-radius: 11px;
   cursor: pointer;
-  font-size: 0; /* hide any text */
+  font-size: 0;
   color: transparent;
   transition: all 0.2s;
   overflow: hidden;
@@ -1020,7 +1007,6 @@ input, select, textarea {
   }
 }
 
-/* ── Popup redesign ───────────────────────────────────────── */
 .pp-wrap {
   min-width: 200px;
   font-family: 'DM Sans', sans-serif;
@@ -1073,14 +1059,7 @@ input, select, textarea {
 }
 .pp-row-val.mono { font-family: 'DM Mono', monospace; font-size: 0.72rem; }
 
-/* Readonly room input style */
-#inputRoom[readonly] {
-  background: var(--bg);
+#inputRoom {
   color: var(--navy);
   font-weight: 600;
-  cursor: default;
-}
-#inputRoom[readonly]:focus {
-  border-color: var(--border);
-  box-shadow: none;
 }
