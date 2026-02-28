@@ -84,8 +84,9 @@
     <div class="form-group">
       <label>Kode Room Keluarga</label>
       <div class="room-row">
-        <input type="text" id="inputRoom" placeholder="Masukkan atau buat kode..."
-               maxlength="8" autocomplete="off" style="text-transform:uppercase;font-family:'DM Mono',monospace;letter-spacing:3px;"/>
+        <input type="text" id="inputRoom" placeholder="Klik Acak untuk generate..."
+               maxlength="6" autocomplete="off" readonly
+               style="text-transform:uppercase;font-family:'DM Mono',monospace;letter-spacing:3px;cursor:default;"/>
         <button class="btn-generate" onclick="generateRoom()">
           <i class="fas fa-dice"></i> Acak
         </button>
@@ -119,7 +120,7 @@
     <p class="modal-desc">Bagikan kode room ini ke anggota keluarga agar mereka bisa bergabung dan saling melihat lokasi.</p>
     <div class="code-box">
       <span class="code-val" id="modalRoomCode">——</span>
-      <button class="copy-btn" onclick="copyCode()"><i class="fas fa-copy"></i> Salin</button>
+      <button class="copy-btn" onclick="copyLink()"><i class="fas fa-link"></i> Salin Link</button>
     </div>
     <div class="share-options">
       <button class="share-opt wa" onclick="shareWA()">
@@ -127,9 +128,6 @@
       </button>
       <button class="share-opt tele" onclick="shareTelegram()">
         <i class="fab fa-telegram"></i> Telegram
-      </button>
-      <button class="share-opt copy" onclick="copyLink()">
-        <i class="fas fa-link"></i> Salin Link
       </button>
     </div>
     <button class="modal-close-btn" onclick="closeModal()">Tutup</button>
@@ -218,49 +216,62 @@
         </div>
       </div>
 
-      <div class="my-card">
-        <div class="my-card-top">
-          <div class="my-avatar" id="myAvatar">—</div>
-          <div class="my-info">
-            <div class="my-name" id="myCardName">—</div>
-            <div class="my-role" id="myCardRole">—</div>
-          </div>
-          <div class="my-badge">Saya</div>
-        </div>
-        <div class="my-coords" id="myCoords">
-          <i class="fas fa-location-dot"></i>
-          <span>Mendapatkan lokasi...</span>
-        </div>
-        <div class="my-location-name" id="myLocationName" style="display:none;">
-          <i class="fas fa-map-marker-alt"></i>
-          <span>—</span>
-        </div>
-        <div class="my-stats">
-          <div class="my-stat">
-            <div class="my-stat-val" id="myAccuracy">—</div>
-            <div class="my-stat-label">📡 Akurasi</div>
-          </div>
-          <div class="my-stat">
-            <div class="my-stat-val" id="myUpdate">—</div>
-            <div class="my-stat-label">🕐 Update</div>
-          </div>
-        </div>
-      </div>
+      <div class="sidebar-scroll">
 
-      <div class="members-list" id="membersList">
-        <div class="no-members" id="noMembers">
-          <i class="fas fa-users"></i>
-          <p>Belum ada anggota lain.<br>Undang keluargamu dengan kode room!</p>
+        <div class="my-card" id="myCard">
+          <div class="my-card-header">
+            <div class="my-avatar" id="myAvatar">—</div>
+            <div class="my-info">
+              <div class="my-name" id="myCardName">—</div>
+              <div class="my-role" id="myCardRole">—</div>
+            </div>
+            <div class="my-badge">Saya</div>
+          </div>
+          <div class="my-card-divider"></div>
+          <div class="my-card-rows" id="myCardRows">
+            <div class="my-card-row" id="myCoords">
+              <i class="fas fa-crosshairs my-card-row-icon"></i>
+              <span class="my-card-row-label">Koordinat</span>
+              <span class="my-card-row-val mono" id="myCoordsVal">Memuat...</span>
+            </div>
+            <div class="my-card-row" id="myLocationNameRow" style="display:none;">
+              <i class="fas fa-map-marker-alt my-card-row-icon" style="color:#93c5fd"></i>
+              <span class="my-card-row-label">Lokasi</span>
+              <span class="my-card-row-val" id="myLocationName">—</span>
+            </div>
+            <div class="my-card-row">
+              <i class="fas fa-satellite-dish my-card-row-icon" style="color:#93c5fd"></i>
+              <span class="my-card-row-label">Akurasi</span>
+              <span class="my-card-row-val" id="myAccuracy">—</span>
+            </div>
+            <div class="my-card-row">
+              <i class="fas fa-clock my-card-row-icon" style="color:#93c5fd"></i>
+              <span class="my-card-row-label">Update</span>
+              <span class="my-card-row-val" id="myUpdate">—</span>
+            </div>
+          </div>
         </div>
-      </div>
 
-      <div class="sidebar-footer">
-        <button class="share-btn" onclick="openModal()">
-          <i class="fas fa-share-nodes"></i> Undang Anggota Keluarga
-        </button>
-        <button class="stop-btn" id="stopBtn" onclick="stopSharing()">
-          <i class="fas fa-location-slash"></i> Stop Berbagi Lokasi
-        </button>
+        <div class="members-section-label">
+          <span>ANGGOTA LAIN</span>
+        </div>
+
+        <div class="members-list" id="membersList">
+          <div class="no-members" id="noMembers">
+            <i class="fas fa-users"></i>
+            <p>Belum ada anggota lain.<br>Undang keluargamu dengan kode room!</p>
+          </div>
+        </div>
+
+        <div class="sidebar-footer">
+          <button class="share-btn" onclick="openModal()">
+            <i class="fas fa-share-nodes"></i> Undang Anggota Keluarga
+          </button>
+          <button class="stop-btn" id="stopBtn" onclick="stopSharing()">
+            <i class="fas fa-location-slash"></i> Stop Berbagi Lokasi
+          </button>
+        </div>
+
       </div>
     </div>
 

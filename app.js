@@ -1,5 +1,21 @@
 const LS_KEY = 'familytrace_profile';
-const COLORS = ['#0F3775','#289DF2','#10b981','#f59e0b','#e8394a','#8b5cf6','#ec4899','#14b8a6'];
+const COLORS = [
+  '#289DF2','#10b981','#f59e0b','#e8394a','#8b5cf6',
+  '#ec4899','#14b8a6','#f97316','#06b6d4','#84cc16',
+  '#a855f7','#ef4444','#22d3ee','#fb923c','#4ade80'
+];
+// Assigned colors map: id -> color (ensures no two members share a color)
+const assignedColors = {};
+let colorIndex = 0;
+
+function getAssignedColor(id) {
+  if (id === state.myId) return '#0F3775'; // always navy for self
+  if (!assignedColors[id]) {
+    assignedColors[id] = COLORS[colorIndex % COLORS.length];
+    colorIndex++;
+  }
+  return assignedColors[id];
+}
 const OFFLINE_THRESHOLD = 60000;
 
 const state = {
@@ -24,13 +40,7 @@ const state = {
   deferredPrompt: null
 };
 
-function hashStr(s) {
-  let h = 0;
-  for (let i = 0; i < s.length; i++) h = (Math.imul(31, h) + s.charCodeAt(i)) | 0;
-  return h;
-}
-
-const getColor = id => COLORS[Math.abs(hashStr(id)) % COLORS.length];
+// Color assignment is handled by getAssignedColor(id)
 
 function timeAgo(ts) {
   if (!ts) return 'Tidak diketahui';
@@ -186,7 +196,11 @@ function requestLocation() {
 
       const urlRoom = new URLSearchParams(location.search).get('room');
       if (urlRoom) {
-        document.getElementById('inputRoom').value = urlRoom.toUpperCase();
+        // Pre-fill from invite link — make temporarily editable
+        const inp = document.getElementById('inputRoom');
+        inp.removeAttribute('readonly');
+        inp.value = urlRoom.toUpperCase().slice(0, 6);
+        inp.setAttribute('readonly', '');
       } else {
         generateRoom();
       }
@@ -209,15 +223,22 @@ function retryPermission() {
 }
 
 function generateRoom() {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let code = '';
-  for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
-  document.getElementById('inputRoom').value = code;
+  const letters = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+  const digits  = '23456789';
+  // 4 letters + 2 digits, then shuffle
+  let parts = [];
+  for (let i = 0; i < 4; i++) parts.push(letters[Math.floor(Math.random() * letters.length)]);
+  for (let i = 0; i < 2; i++) parts.push(digits[Math.floor(Math.random() * digits.length)]);
+  // Fisher-Yates shuffle
+  for (let i = parts.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [parts[i], parts[j]] = [parts[j], parts[i]];
+  }
+  document.getElementById('inputRoom').value = parts.join('');
 }
 
-document.getElementById('inputRoom').addEventListener('input', function () {
-  this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-});
+// inputRoom is readonly — only generateRoom() sets its value
+// URL room param auto-fill handled in requestLocation()
 
 async function startApp() {
   const name = document.getElementById('inputName').value.trim();
@@ -225,9 +246,13 @@ async function startApp() {
   const room = document.getElementById('inputRoom').value.trim();
 
   if (!name) { toast('Masukkan nama kamu dulu!', 'error'); return; }
-  if (room.length < 4) { toast('Kode room minimal 4 karakter', 'error'); return; }
+  if (!/^[a-zA-Z ]+$/.test(name)) { toast('Nama hanya boleh menggunakan huruf!', 'error'); return; }
+  // Auto capitalize each word
+  const nameFormatted = name.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+  if (!/^[a-zA-Z\s]+$/.test(name)) { toast('Nama hanya boleh menggunakan huruf!', 'error'); return; }
+  if (room.length < 6) { toast('Klik tombol Acak untuk membuat kode room!', 'error'); return; }
 
-  state.name = name;
+  state.name = nameFormatted;
   state.role = role;
   state.room = room;
   state.myId = name.toLowerCase().replace(/\s+/g, '_') + '_' + Date.now().toString(36);
@@ -418,7 +443,7 @@ function createMarkerIcon(initial, color, offline) {
 }
 
 function placeMyMarker(lat, lng) {
-  const color   = getColor(state.myId || 'me');
+  const color   = '#0F3775'; // always navy for self
   const initial = (state.name || '?')[0].toUpperCase();
   const icon    = createMarkerIcon(initial, color, false);
   const locName = state.myLocationName;
@@ -436,31 +461,61 @@ function placeMyMarker(lat, lng) {
 }
 
 function buildPopup(name, role, lat, lng, battery, accuracy, isMe, online, ts, locationName) {
-  const locStr  = locationName ? `<div class="popup-location"><i class="fas fa-map-marker-alt"></i> ${locationName}</div>` : '';
-  const accStr  = accuracy !== null && accuracy !== undefined ? `${accuracy}m` : '—';
+  const accStr   = accuracy !== null && accuracy !== undefined ? `${accuracy}m` : '—';
   const accColor = accuracy !== null && accuracy !== undefined
     ? (accuracy <= 20 ? '#10b981' : accuracy <= 100 ? '#f59e0b' : '#e8394a')
     : '#6b7fa3';
-  const statusLine = !isMe
-    ? `<div style="font-size:.75rem;margin-top:.4rem;color:${online ? '#10b981' : '#6b7fa3'}">
-        ${online ? '🟢 Online' : `🔴 Terakhir terlihat: ${timeAgo(ts)}`}
-       </div>`
+  const accLabel = accuracy !== null && accuracy !== undefined
+    ? (accuracy <= 20 ? 'Sangat Baik' : accuracy <= 100 ? 'Baik' : 'Rendah')
+    : '—';
+
+  const locHtml = locationName
+    ? `<div class="pp-location"><i class="fas fa-map-marker-alt"></i>${locationName}</div>`
     : '';
-  return `<div>
-    <div class="popup-name">${isMe ? '📍 ' : ''}${name}${isMe ? ' (Saya)' : ''}</div>
-    <div class="popup-coords">${lat.toFixed(5)}, ${lng.toFixed(5)}</div>
-    ${locStr}
-    <div style="font-size:.8rem;color:${accColor};margin-top:.3rem;display:flex;align-items:center;gap:.3rem">
-      <i class="fas fa-satellite-dish" style="font-size:.7rem"></i> Akurasi: ${accStr}
+
+  const statusHtml = !isMe
+    ? online
+      ? `<div class="pp-status online"><span class="pp-status-dot"></span>Online</div>`
+      : `<div class="pp-status offline"><i class="fas fa-clock"></i>${timeAgo(ts)}</div>`
+    : `<div class="pp-status online"><span class="pp-status-dot"></span>Saya</div>`;
+
+  const roleHtml = role
+    ? `<div class="pp-role">${role}</div>`
+    : '';
+
+  return `<div class="pp-wrap">
+    <div class="pp-header">
+      <div class="pp-avatar">${name[0].toUpperCase()}</div>
+      <div class="pp-header-info">
+        <div class="pp-name">${name}</div>
+        ${roleHtml}
+      </div>
+      ${statusHtml}
     </div>
-    ${role ? `<div style="font-size:.75rem;color:#6b7fa3;margin-top:.3rem">${role}</div>` : ''}
-    ${statusLine}
+    <div class="pp-divider"></div>
+    <div class="pp-body">
+      <div class="pp-row">
+        <i class="fas fa-crosshairs pp-row-icon"></i>
+        <span class="pp-row-label">Koordinat</span>
+        <span class="pp-row-val mono">${lat.toFixed(5)}, ${lng.toFixed(5)}</span>
+      </div>
+      ${locationName ? `<div class="pp-row">
+        <i class="fas fa-map-marker-alt pp-row-icon" style="color:#289DF2"></i>
+        <span class="pp-row-label">Lokasi</span>
+        <span class="pp-row-val">${locationName}</span>
+      </div>` : ''}
+      <div class="pp-row">
+        <i class="fas fa-satellite-dish pp-row-icon" style="color:${accColor}"></i>
+        <span class="pp-row-label">Akurasi</span>
+        <span class="pp-row-val" style="color:${accColor}">${accStr} <span style="opacity:.7;font-size:.7rem">(${accLabel})</span></span>
+      </div>
+    </div>
   </div>`;
 }
 
 function placeMemberMarker(id, member) {
   if (!member.lat) return;
-  const color   = getColor(id);
+  const color   = getAssignedColor(id);
   const initial = (member.name || '?')[0].toUpperCase();
   const online  = isOnline(member.ts);
   const icon    = createMarkerIcon(initial, color, !online);
@@ -583,28 +638,35 @@ function initMyCard() {
   document.getElementById('myCardName').textContent = state.name;
   document.getElementById('myCardRole').textContent = state.role;
   document.getElementById('myAvatar').textContent   = state.name[0].toUpperCase();
+  // self avatar color is always navy (set via CSS bg on .my-card-header)
 }
 
 function updateMyCard() {
   if (state.myLat) {
-    document.getElementById('myCoords').innerHTML =
-      `<i class="fas fa-location-dot"></i> ${state.myLat.toFixed(5)}, ${state.myLng.toFixed(5)}`;
+    const coordVal = document.getElementById('myCoordsVal');
+    if (coordVal) coordVal.textContent = `${state.myLat.toFixed(5)},  ${state.myLng.toFixed(5)}`;
   }
 
-  // Location name
-  const locEl = document.getElementById('myLocationName');
-  if (locEl) {
+  // Location name row
+  const locRow = document.getElementById('myLocationNameRow');
+  const locEl  = document.getElementById('myLocationName');
+  if (locRow && locEl) {
     if (state.myLocationName) {
-      locEl.innerHTML = `<i class="fas fa-map-marker-alt"></i> ${state.myLocationName}`;
-      locEl.style.display = 'flex';
+      locEl.textContent   = state.myLocationName;
+      locRow.style.display = 'flex';
     } else {
-      locEl.style.display = 'none';
+      locRow.style.display = 'none';
     }
   }
 
-  // Stats: removed battery, keep accuracy and update time
-  if (state.myAccuracy !== null)
-    document.getElementById('myAccuracy').textContent = state.myAccuracy + 'm';
+  // Accuracy with color
+  const accEl = document.getElementById('myAccuracy');
+  if (accEl && state.myAccuracy !== null) {
+    const acc = state.myAccuracy;
+    const color = acc <= 20 ? '#93c5fd' : acc <= 100 ? '#fcd34d' : '#fca5a5';
+    accEl.textContent = acc + 'm';
+    accEl.style.color = color;
+  }
 
   document.getElementById('myUpdate').textContent =
     new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
@@ -636,40 +698,58 @@ function renderMembers() {
   document.getElementById('onlineCount').textContent = onlineMembers.length + 1;
 
   [...onlineMembers, ...offlineMembers].forEach(([id, m]) => {
-    const color    = getColor(id);
+    const color    = getAssignedColor(id);
     const initial  = (m.name || '?')[0].toUpperCase();
     const online   = isOnline(m.ts);
     const acc      = m.accuracy;
     const locName  = state.memberLocationNames[id]?.name || null;
     const accClass = (acc !== null && acc !== undefined) ? (acc <= 20 ? 'acc-good' : acc <= 100 ? 'acc-mid' : 'acc-low') : 'acc-mid';
     const accText  = (acc !== null && acc !== undefined) ? acc + 'm' : '—';
+    const accIcon  = (acc !== null && acc !== undefined) ? 'fa-satellite-dish' : 'fa-satellite-dish';
 
     const div = document.createElement('div');
     div.className = `member-item${online ? '' : ' member-offline'}`;
     div.setAttribute('data-id', id);
     div.innerHTML = `
-      <div class="member-avatar" style="background:${color}1a;color:${color};border:2px solid ${color}40;${online ? '' : 'opacity:.45'}">
-        ${initial}
-        <div class="member-online-dot${online ? '' : ' offline'}"></div>
-      </div>
-      <div class="member-info">
-        <div class="member-name" style="${online ? '' : 'color:var(--muted)'}">
-          ${m.name}${online ? '' : ' <span class="offline-tag">Offline</span>'}
+      <div class="mc-accent" style="background:${color}"></div>
+      <div class="mc-body">
+        <div class="mc-header">
+          <div class="mc-avatar" style="background:${color}">${initial}</div>
+          <div class="mc-header-info">
+            <div class="mc-name">${m.name}</div>
+            <div class="mc-role">${m.role || ''}</div>
+          </div>
+          <div class="mc-header-right">
+            <div class="mc-status-pill ${online ? 'online' : 'offline'}">
+              ${online
+                ? '<span class="mc-status-dot"></span>Online'
+                : '<i class="fas fa-moon" style="font-size:.55rem"></i>Offline'}
+            </div>
+            <button class="mc-locate-btn" onclick="locateMember('${id}')">
+              <i class="fas fa-location-dot"></i>
+            </button>
+          </div>
         </div>
-        <div class="member-sub">
-          ${online
-            ? `${m.role} · ${m.lat ? m.lat.toFixed(4) + ', ' + m.lng.toFixed(4) : 'Memuat...'}`
-            : `<i class="fas fa-clock" style="font-size:.7rem"></i> Terakhir: ${timeAgo(m.ts)}`}
+        <div class="mc-divider"></div>
+        <div class="mc-rows">
+          ${online && m.lat ? `<div class="mc-row">
+            <i class="fas fa-crosshairs mc-row-icon"></i>
+            <span class="mc-row-label">Koordinat</span>
+            <span class="mc-row-val mono">${m.lat.toFixed(5)},  ${m.lng.toFixed(5)}</span>
+          </div>` : ''}
+          ${locName ? `<div class="mc-row">
+            <i class="fas fa-map-marker-alt mc-row-icon" style="color:#289DF2"></i>
+            <span class="mc-row-label">Lokasi</span>
+            <span class="mc-row-val">${locName}</span>
+          </div>` : ''}
+          <div class="mc-row">
+            <i class="fas fa-${online ? 'satellite-dish' : 'clock'} mc-row-icon" style="color:${online ? (acc !== null && acc !== undefined ? (acc <= 20 ? '#10b981' : acc <= 100 ? '#f59e0b' : '#e8394a') : 'var(--muted)') : 'var(--muted)'}"></i>
+            <span class="mc-row-label">${online ? 'Akurasi' : 'Terakhir'}</span>
+            <span class="mc-row-val" style="color:${online ? (acc !== null && acc !== undefined ? (acc <= 20 ? '#10b981' : acc <= 100 ? '#f59e0b' : '#e8394a') : 'var(--muted)') : 'var(--muted)'}">
+              ${online ? accText : timeAgo(m.ts)}
+            </span>
+          </div>
         </div>
-        ${online && locName ? `<div class="member-location-name"><i class="fas fa-map-marker-alt"></i> ${locName}</div>` : ''}
-        ${online ? `<div class="member-accuracy ${accClass}">
-          <i class="fas fa-satellite-dish"></i> Akurasi ${accText}
-        </div>` : ''}
-      </div>
-      <div class="member-meta">
-        <button class="locate-btn" onclick="locateMember('${id}')">
-          <i class="fas fa-location-dot"></i>
-        </button>
       </div>`;
     list.appendChild(div);
   });
