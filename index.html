@@ -84,9 +84,9 @@
     <div class="form-group">
       <label>Kode Room Keluarga</label>
       <div class="room-row">
-        <input type="text" id="inputRoom" placeholder="Klik Acak untuk generate..."
-               maxlength="6" autocomplete="off" readonly
-               style="text-transform:uppercase;font-family:'DM Mono',monospace;letter-spacing:3px;cursor:default;"/>
+        <input type="text" id="inputRoom" placeholder="Ketik atau klik Acak..."
+               maxlength="6" autocomplete="off" inputmode="text"
+               style="text-transform:uppercase;font-family:'DM Mono',monospace;letter-spacing:3px;font-size:16px;"/>
         <button class="btn-generate" onclick="generateRoom()">
           <i class="fas fa-dice"></i> Acak
         </button>
@@ -99,6 +99,7 @@
   </div>
 </div>
 
+<!-- Custom confirm modal for leaving room -->
 <div class="modal-overlay" id="confirmLeaveModal">
   <div class="modal-box confirm-modal-box">
     <div class="confirm-icon-wrap">
@@ -278,7 +279,7 @@
       <button class="mob-toggle" id="mobToggle" onclick="toggleSidebar()">
         <i class="fas fa-bars"></i>
       </button>
-      
+      <!-- Map status moved to top -->
       <div class="map-status">
         <i class="fas fa-circle"></i>
         Lokasi diperbarui otomatis &nbsp;·&nbsp;
@@ -297,6 +298,7 @@
         </button>
       </div>
 
+      <!-- Custom layer panel -->
       <div class="layer-panel" id="layerPanel">
         <div class="layer-panel-title">Tampilan Peta</div>
         <button class="layer-option active" id="layerStreet" onclick="setLayer('street')">

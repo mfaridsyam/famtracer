@@ -29,7 +29,6 @@ body {
   touch-action: pan-x pan-y;
 }
 
-/* Fix 100vh on iOS Chrome — dvh accounts for browser bar */
 #app { height: 100dvh !important; }
 
 input, select, textarea {
@@ -1062,4 +1061,5 @@ input, select, textarea {
 #inputRoom {
   color: var(--navy);
   font-weight: 600;
+  font-size: 16px !important;
 }
